@@ -1,0 +1,30 @@
+# tunneld configuration — anonymous quick tunnels (ngrok-style).
+
+# Address the public listener binds to.
+# Production (acme/manual TLS) should be :443.
+listen: ":8484"
+
+# Externally visible base URL. Public tunnel URLs are built from it
+# (<public_base_url>/t/<q-slug>/s/mcp), so it must match how clients
+# reach this server.
+public_base_url: "http://localhost:8484"
+
+tls:
+  # acme     — automatic Let's Encrypt certs (needs :443 reachable publicly,
+  #            uses TLS-ALPN-01; set acme.cache_dir / acme.email)
+  # manual   — use manual.cert_file / manual.key_file
+  # disabled — plain HTTP, development only (MCP clients generally require
+  #            real HTTPS)
+  mode: disabled
+  acme:
+    cache_dir: "./acme-cache"
+    email: "you@example.com"
+  manual:
+    cert_file: "./cert.pem"
+    key_file: "./key.pem"
+
+# SQLite database file holding tunneld's state (ephemeral tenants, services,
+# agent keys). May also be supplied via the DATABASE_PATH environment
+# variable. In docker-compose the ./data volume is mounted at /data, so the
+# default works there too.
+database_path: "./data/tunneld.db"
