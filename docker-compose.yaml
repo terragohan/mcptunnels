@@ -1,0 +1,27 @@
+services:
+  tunneld:
+    build:
+      context: .
+      target: tunneld
+    ports:
+      - "443:443"   # TLS + ACME TLS-ALPN-01
+    volumes:
+      - ./data:/data   # tunneld.yaml, SQLite DB, ACME cache
+    restart: unless-stopped
+
+  # Example: a sidecar agent + MCP server on an internal network.
+  # The agent dials OUTBOUND to tunneld — no published ports needed.
+  #
+  # my-mcp-server:
+  #   image: your-mcp-server:latest
+  #   networks: [internal]
+  #
+  # agent:
+  #   build:
+  #     context: .
+  #     target: tunnel-agent
+  #   volumes:
+  #     - ./agent.yaml:/etc/tunnel-agent/agent.yaml:ro
+  #   depends_on: [my-mcp-server]
+  #   networks: [internal]
+  #   restart: unless-stopped

@@ -1,0 +1,69 @@
+# tunneld configuration (v2 — multi-tenant OAuth 2.1 AS under /t/{tenant}).
+
+# Address the public listener binds to.
+# Production (acme/manual TLS) should be :443.
+listen: ":8484"
+
+# Externally visible base URL. This is the OAuth issuer: all discovery
+# metadata and token `iss` claims derive from it, so it must match how
+# clients (ChatGPT) reach this server.
+public_base_url: "http://localhost:8484"
+
+tls:
+  # acme     — automatic Let's Encrypt certs (needs :443 reachable publicly,
+  #            uses TLS-ALPN-01; set acme.cache_dir / acme.email)
+  # manual   — use manual.cert_file / manual.key_file
+  # disabled — plain HTTP, development only (ChatGPT itself requires real HTTPS)
+  mode: disabled
+  acme:
+    cache_dir: "./acme-cache"
+    email: "you@example.com"
+  manual:
+    cert_file: "./cert.pem"
+    key_file: "./key.pem"
+
+# SQLite database file holding tunneld's state (tenants, tokens, services,
+# clients, codes, refresh tokens, signing keys, audit log). May also be
+# supplied via the DATABASE_PATH environment variable. In docker-compose the
+# ./data volume is mounted at /data, so the default works there too.
+database_path: "./data/tunneld.db"
+
+# Dev login: FALLBACK identity only — used for tenants that have neither an
+# IdP configured nor their own login password (tenants get one at signup,
+# rotatable via `mcptunnel password reset`). NOT for production.
+dev_auth:
+  username: dev
+  password: change-me
+
+# Per-tenant upstream OIDC providers are managed via the CLI:
+#   mcptunnel idp set acme --provider google --client-id ... --client-secret ... \
+#     --issuer https://accounts.google.com --allowed-domain acme.com
+# The provider's redirect/callback URL to register is:
+#   <public_base_url>/t/<tenant>/idp/<name>/callback
+# Note: tunneld caches per-tenant IdP config in memory; restart after changes.
+
+# OAuth token lifetimes (these are the defaults).
+tokens:
+  access_ttl: 15m
+  refresh_ttl: 720h # 30 days
+
+# Scopes advertised in the AS metadata and shown on the consent screen.
+scopes:
+  - read
+  - write
+
+# Backend services are no longer configured here. Create them via the CLI:
+#   mcptunnel service create acme/demo --auth-mode strict [--identity-secret S]
+#   mcptunnel agent-key issue acme/demo
+# and point the agent at them with tenant/service/agent_key in agent.yaml.
+#
+# auth_mode (default strict):
+#   strict         — every request needs a valid access token.
+#   discovery_open — unauthenticated MCP initialize/ping/tools/list (plus the
+#                    SSE GET) on /t/<tenant>/s/<name>/mcp pass through;
+#                    everything else still needs a token. Works around
+#                    ChatGPT's connector scanner, which enumerates tools
+#                    before completing OAuth.
+# identity_secret: when set, authenticated requests to the backend carry
+#   X-Auth-Subject / X-Auth-Email / X-Auth-Scopes / X-Auth-Client-Id and an
+#   HMAC-SHA256 X-Auth-Signature keyed with this secret.

@@ -1,0 +1,19 @@
+# tunnel-agent configuration.
+
+# Base WebSocket URL of tunneld; /tunnel/connect is appended automatically.
+# Use wss:// in production, ws:// for local dev against a "disabled" TLS tunneld.
+server: "ws://localhost:8484"
+
+# Tenant + service this agent serves, and the agent key issued by
+# `mcptunnel service create acme/demo` (or `mcptunnel agent-key issue`).
+tenant: "acme"
+service: "demo"
+agent_key: "tun_agent_..."
+
+# Local HTTP server requests are forwarded to (e.g. your MCP server).
+upstream: "http://localhost:3000"
+
+# Reconnect backoff (optional; these are the defaults).
+reconnect:
+  initial_backoff: 1s
+  max_backoff: 30s
