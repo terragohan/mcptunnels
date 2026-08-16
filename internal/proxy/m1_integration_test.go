@@ -22,7 +22,6 @@ import (
 
 // TestM1EndToEnd spins up tunneld (plain HTTP = "disabled" TLS mode), a dummy
 // upstream, and an in-process agent, then drives traffic through the tunnel.
-// The proxy runs without auth here; bearer gating is covered in the M2 tests.
 func TestM1EndToEnd(t *testing.T) {
 	// Dummy upstream: echoes request line/headers/body, streams SSE.
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +63,7 @@ func TestM1EndToEnd(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.Handle(tunnelproto.ConnectPath, gw)
 	mux.HandleFunc("GET /healthz", proxy.Healthz)
-	mux.Handle("/t/{tenant}/s/", proxy.New(gw, nil)) // no auth in this test
+	mux.Handle("/t/{tenant}/s/", proxy.New(gw, st))
 	tunneld := httptest.NewServer(mux)
 	defer tunneld.Close()
 

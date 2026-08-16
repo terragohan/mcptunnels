@@ -1,9 +1,7 @@
-// Command tunneld is the tunnel server: it accepts outbound agent connections
-// and reverse-proxies public HTTP traffic over them to local services.
-//
-// M2 surface: per-tenant OAuth 2.1 AS under /t/{tenant}/..., the MCP proxy
-// under /t/{tenant}/s/{service}/..., the /api/v1 control plane, the
-// /tunnel/connect agent gateway and /healthz.
+// Command tunneld is the quick-tunnel server: it creates anonymous ephemeral
+// tenants (POST /api/v1/quick), accepts outbound agent connections on
+// /tunnel/connect, and reverse-proxies public HTTP traffic under
+// /t/{tenant}/s/{service}/... over them to the agents' local MCP servers.
 package main
 
 import (
@@ -15,8 +13,6 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -25,7 +21,6 @@ import (
 	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
 	"github.com/generalpiston/openai-tunnel-oauth/internal/controlplane"
 	"github.com/generalpiston/openai-tunnel-oauth/internal/gateway"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/oauth"
 	"github.com/generalpiston/openai-tunnel-oauth/internal/proxy"
 	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
 	"github.com/generalpiston/openai-tunnel-oauth/internal/tunnelproto"
@@ -41,8 +36,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	issuer := strings.TrimRight(cfg.PublicBaseURL, "/")
-
 	st, err := store.Open(cfg.DatabasePath)
 	if err != nil {
 		slog.Error("open store", "err", err)
@@ -50,74 +43,15 @@ func main() {
 	}
 	defer st.Close()
 
-	// Agents authenticate with store-issued agent keys (mcptunnel service
-	// create / agent-key issue) plus X-Tenant / X-Service-Name headers.
+	// Agents authenticate with the agent key returned by POST /api/v1/quick
+	// plus X-Tenant / X-Service-Name headers.
 	gw := gateway.New(st)
-	gw.SetAuditFunc(func(tenant, event, service, remoteAddr string) {
-		if err := st.LogAudit(tenant, store.AuditEntry{
-			Event:   event,
-			Service: service,
-			IP:      remoteAddr,
-		}); err != nil {
-			slog.Debug("audit write failed", "event", event, "err", err)
-		}
-	})
-
-	// Control-plane bootstrap: while no operator tokens exist, create a
-	// one-time setup token and print it prominently on startup.
-	hasOps, err := st.HasOperatorTokens()
-	if err != nil {
-		slog.Error("check operator tokens", "err", err)
-		os.Exit(1)
-	}
-	setupTokenPath := filepath.Join(filepath.Dir(cfg.DatabasePath), "setup_token")
-	if !hasOps {
-		setupToken, err := st.CreateSetupToken()
-		if err != nil {
-			slog.Error("create setup token", "err", err)
-			os.Exit(1)
-		}
-		// Also write it next to the database (0600) so co-located users don't
-		// have to grep logs; deleted by the control plane once bootstrap
-		// succeeds.
-		if err := os.WriteFile(setupTokenPath, []byte(setupToken+"\n"), 0o600); err != nil {
-			slog.Warn("could not write setup token file", "path", setupTokenPath, "err", err)
-		}
-		slog.Warn("tunneld: no operator tokens exist — control-plane bootstrap is ENABLED",
-			"setup_token", setupToken,
-			"setup_token_file", setupTokenPath,
-			"hint", "mcptunnel bootstrap --server <url> --setup-token "+setupToken)
-	}
-
-	resolver := oauth.NewResolver(oauth.ResolverConfig{
-		BaseURL:              issuer,
-		Store:                st,
-		DevUsername:          cfg.DevAuth.Username,
-		DevPassword:          cfg.DevAuth.Password,
-		AllowedRedirectHosts: cfg.OAuth.AllowedRedirectHosts,
-		AccessTokenTTL:       cfg.Tokens.AccessTTL.D(),
-		RefreshTokenTTL:      cfg.Tokens.RefreshTTL.D(),
-		Scopes:               cfg.Scopes,
-	})
-
-	cp := controlplane.New(st, resolver)
-	cp.OnBootstrap = func() {
-		if err := os.Remove(setupTokenPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-			slog.Warn("could not remove setup token file", "path", setupTokenPath, "err", err)
-		}
-	}
+	cp := controlplane.New(st)
 
 	mux := http.NewServeMux()
 	mux.Handle(tunnelproto.ConnectPath, gw)
 	mux.Handle("/api/v1/", cp.Handler())
-	mux.Handle("/t/{tenant}/s/", proxy.New(gw, &proxy.Auth{
-		BaseURL: issuer,
-		ValidatorFor: func(tenant string) (proxy.Validator, bool) {
-			return resolver.Validator(tenant)
-		},
-		Store: st,
-	}))
-	mux.Handle("/", resolver.Handler())
+	mux.Handle("/t/{tenant}/s/", proxy.New(gw, st))
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("ok\n"))
@@ -125,6 +59,28 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	// Janitor: delete expired quick-tunnel tenants every minute; their public
+	// endpoints start returning 404 and their agent keys stop validating.
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				slugs, err := st.DeleteExpiredTenants(time.Now())
+				if err != nil {
+					slog.Warn("tunneld: expired-tenant sweep failed", "err", err)
+					continue
+				}
+				for _, slug := range slugs {
+					slog.Info("tunneld: deleted expired quick-tunnel tenant", "tenant", slug)
+				}
+			}
+		}
+	}()
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,

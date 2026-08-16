@@ -9,15 +9,15 @@
 # What it does (sudo is used only where marked):
 #   1. apt: installs git, supervisor, sqlite3, ufw            [sudo]
 #   2. installs a user-local Go 1.26 toolchain under ~/tunneld/go
-#   3. builds tunneld + mcptunnel + mcptunnel-admin + mcptunnel-admin into ~/tunneld/bin
+#   3. builds tunneld + mcptunnel into ~/tunneld/bin
 #   4. setcap cap_net_bind_service so tunneld can bind :443 as a user  [sudo]
 #   5. ufw: allow 443/tcp                                     [sudo]
 #   6. writes ~/tunneld/tunneld.yaml (edit it before starting!)
 #   7. writes ~/tunneld/supervisord.conf and a systemd --user unit,
 #      enables lingering so supervisord starts at boot         [sudo]
 #
-# After running: edit ~/tunneld/tunneld.yaml (public_base_url, acme email,
-# dev_auth password), then:
+# After running: edit ~/tunneld/tunneld.yaml (public_base_url, acme email),
+# then:
 #   systemctl --user start supervisord
 #   supervisorctl -c ~/tunneld/supervisord.conf status
 
@@ -62,7 +62,6 @@ export PATH="$HOME_DIR/go/bin:$PATH"
 echo "==> building"
 (cd "$REPO_ROOT" && CGO_ENABLED=0 go build -buildvcs=false -trimpath -ldflags="-s -w" -o "$HOME_DIR/bin/tunneld" ./cmd/tunneld)
 (cd "$REPO_ROOT" && CGO_ENABLED=0 go build -buildvcs=false -trimpath -ldflags="-s -w" -o "$HOME_DIR/bin/mcptunnel" ./cmd/mcptunnel)
-(cd "$REPO_ROOT" && CGO_ENABLED=0 go build -buildvcs=false -trimpath -ldflags="-s -w" -o "$HOME_DIR/bin/mcptunnel-admin" ./cmd/mcptunnel-admin)
 sudo setcap cap_net_bind_service=+ep "$HOME_DIR/bin/tunneld"   # bind :443 as a user
 
 echo "==> firewall"
@@ -72,16 +71,13 @@ sudo ufw allow OpenSSH
 if [ ! -f "$HOME_DIR/tunneld.yaml" ]; then
   cat > "$HOME_DIR/tunneld.yaml" <<EOF
 listen: ":443"
-public_base_url: "https://EDIT-ME.example.com"   # OAuth issuer; must match exactly
+public_base_url: "https://EDIT-ME.example.com"   # must match how clients reach this server
 tls:
   mode: acme
   acme:
     cache_dir: "$HOME_DIR/data/acme-cache"
     email: "you@example.com"
 database_path: "$HOME_DIR/data/tunneld.db"
-dev_auth:
-  username: dev
-  password: "$(openssl rand -hex 16 2>/dev/null || head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')"
 EOF
   echo "    wrote $HOME_DIR/tunneld.yaml — EDIT public_base_url and acme.email before starting"
 fi
@@ -137,13 +133,8 @@ Done. Next steps:
   2. Point your domain's A/AAAA record at this host (Cloudflare: DNS only, not proxied)
   3. systemctl --user start supervisord
   4. supervisorctl -c ~/tunneld/supervisord.conf status
-  5. The one-time setup token is in $HOME_DIR/data/setup_token
-     (deleted automatically once bootstrap succeeds)
-  6. From your laptop:
-       mcptunnel-admin bootstrap --server https://<domain> --setup-token tun_setup_...
-     or, right here on the box (reads the URL from the config):
-       $HOME_DIR/bin/mcptunnel-admin bootstrap --config $HOME_DIR/tunneld.yaml \\
-           --setup-token "\$(cat $HOME_DIR/data/setup_token)"
+  5. Try it out (anonymous quick tunnel, expires in 24h):
+       mcptunnel expose --server https://<domain> -- <mcp server command>
 
 Backups: the only state is $HOME_DIR/data/tunneld.db —
   sqlite3 $HOME_DIR/data/tunneld.db ".backup '\$HOME/tunneld/backups/tunneld.db'"

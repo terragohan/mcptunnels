@@ -30,13 +30,7 @@ type Gateway struct {
 
 	mu       sync.Mutex
 	sessions map[string]*yamux.Session // tenant + "\x00" + service -> active session
-
-	auditMu sync.RWMutex
-	auditFn AuditFunc
 }
-
-// AuditFunc is called on agent connect/disconnect events.
-type AuditFunc func(tenantSlug, event, service, remoteAddr string)
 
 // New returns a Gateway that authorizes agents against the store:
 // Authorization: Bearer <agent_key> is checked with
@@ -45,23 +39,6 @@ func New(st *store.Store) *Gateway {
 	return &Gateway{
 		st:       st,
 		sessions: make(map[string]*yamux.Session),
-	}
-}
-
-// SetAuditFunc registers a hook invoked with "agent_connected" /
-// "agent_disconnected" events.
-func (g *Gateway) SetAuditFunc(fn AuditFunc) {
-	g.auditMu.Lock()
-	defer g.auditMu.Unlock()
-	g.auditFn = fn
-}
-
-func (g *Gateway) audit(tenant, event, service, remoteAddr string) {
-	g.auditMu.RLock()
-	fn := g.auditFn
-	g.auditMu.RUnlock()
-	if fn != nil {
-		fn(tenant, event, service, remoteAddr)
 	}
 }
 
@@ -100,14 +77,12 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	sk := sessionKey(tenant, service)
 	g.register(sk, sess)
 	slog.Info("gateway: agent connected", "tenant", tenant, "service", service, "remote", r.RemoteAddr)
-	g.audit(tenant, "agent_connected", service, r.RemoteAddr)
 
 	// Block until the tunnel dies; the request context then closes the
 	// WebSocket, and we drop the session from the registry.
 	<-sess.CloseChan()
 	g.unregister(sk, sess)
 	slog.Info("gateway: agent disconnected", "tenant", tenant, "service", service)
-	g.audit(tenant, "agent_disconnected", service, r.RemoteAddr)
 }
 
 // Dial returns a connection to the agent currently serving the (tenant,

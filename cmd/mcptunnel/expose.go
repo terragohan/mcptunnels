@@ -6,7 +6,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -19,10 +18,11 @@ import (
 	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
 )
 
-// runExpose implements `mcptunnel expose <tenant>/<name> [flags] -- <cmd>...`:
-// it creates the service if needed, issues a fresh agent key, runs the given
-// stdio MCP server command behind a local HTTP bridge, and connects the tunnel
-// agent — one command from local MCP server to public endpoint, ngrok-style.
+// runExpose implements `mcptunnel expose [--server URL] -- <cmd>...`: it
+// creates an anonymous quick tunnel via POST /api/v1/quick, runs the given
+// stdio MCP server command behind a local HTTP bridge, and connects the
+// tunnel agent — one command from local MCP server to public endpoint,
+// ngrok-style.
 func runExpose(w io.Writer, args []string) error {
 	// Everything after "--" is the MCP server command.
 	flagArgs, cmdArgs := args, []string(nil)
@@ -34,47 +34,41 @@ func runExpose(w io.Writer, args []string) error {
 	}
 
 	fs := cli.NewFlagSet("expose")
-	var conn cli.ConnFlags
-	conn.Register(fs)
-	authMode := fs.String("auth-mode", "strict", "strict|discovery_open")
+	server := fs.String("server", "", "tunneld base URL (required unless --config is given)")
+	configPath := fs.String("config", "", "tunneld.yaml to read the server URL from (same-host use)")
 	pos, err := cli.ParseIntermixed(fs, flagArgs)
 	if err != nil {
 		return cli.Usagef("%v", err)
 	}
-	if len(pos) != 1 || len(cmdArgs) == 0 {
-		return cli.Usagef("usage: mcptunnel expose <tenant>/<name> [--auth-mode strict|discovery_open] -- <mcp server command> [args...]")
-	}
-	tenant, name, err := cli.SplitRef(pos[0])
-	if err != nil {
-		return cli.Usagef("%v", err)
+	if len(pos) > 0 || len(cmdArgs) == 0 {
+		return cli.Usagef("usage: mcptunnel expose [--server URL | --config PATH] -- <mcp server command> [args...]")
 	}
 
-	c, err := conn.Resolve(sessionPath)
-	if err != nil {
+	base := *server
+	if base == "" && *configPath != "" {
+		s, err := cli.ServerFromConfig(*configPath)
+		if err != nil {
+			return err
+		}
+		base = s
+	}
+	if base == "" {
+		return cli.Usagef("usage: mcptunnel expose --server URL -- <mcp server command> [args...]")
+	}
+
+	// Create the anonymous quick tunnel: an ephemeral tenant (24h TTL) with a
+	// single open service; the agent key authenticates the agent below.
+	c := cli.NewClient(base)
+	var resp struct {
+		Tenant    string `json:"tenant"`
+		Service   string `json:"service"`
+		AgentKey  string `json:"agent_key"`
+		ExpiresAt int64  `json:"expires_at"`
+	}
+	if err := c.Do("POST", "/quick", nil, nil, &resp); err != nil {
 		return err
 	}
-
-	// Create the service if it doesn't exist yet; reuse it otherwise.
-	createErr := c.Do("POST", "/tenants/"+url.PathEscape(tenant)+"/services", nil, map[string]string{
-		"name":      name,
-		"auth_mode": *authMode,
-	}, nil)
-	switch {
-	case createErr == nil:
-		fmt.Fprintf(w, "created service %s/%s\n", tenant, name)
-	case strings.HasPrefix(createErr.Error(), "conflict:"):
-		fmt.Fprintf(w, "service %s/%s already exists; reusing it\n", tenant, name)
-	default:
-		return createErr
-	}
-
-	// Issue a fresh agent key (any previous key is revoked).
-	var keyResp struct {
-		AgentKey string `json:"agent_key"`
-	}
-	if err := c.Do("POST", "/tenants/"+url.PathEscape(tenant)+"/services/"+url.PathEscape(name)+"/agent-key", nil, nil, &keyResp); err != nil {
-		return err
-	}
+	ttl := time.Until(time.Unix(resp.ExpiresAt, 0)).Round(time.Minute)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -96,10 +90,10 @@ func runExpose(w io.Writer, args []string) error {
 	defer httpSrv.Close()
 
 	cfg := &config.AgentConfig{
-		Server:   httpToWS(c.Base),
-		Tenant:   tenant,
-		Service:  name,
-		AgentKey: keyResp.AgentKey,
+		Server:   httpToWS(base),
+		Tenant:   resp.Tenant,
+		Service:  resp.Service,
+		AgentKey: resp.AgentKey,
 		Upstream: "http://" + ln.Addr().String(),
 	}
 	cfg.Reconnect.InitialBackoff = config.Duration(time.Second)
@@ -110,7 +104,8 @@ func runExpose(w io.Writer, args []string) error {
 		return err
 	}
 
-	fmt.Fprintf(w, "\npublic MCP endpoint:\n\n  %s/t/%s/s/%s/mcp\n\nuse OAuth in your MCP client; press Ctrl-C to stop.\n", c.Base, tenant, name)
+	fmt.Fprintf(w, "\ntemporary public MCP endpoint (expires in %s):\n\n  %s/t/%s/s/%s/mcp\n\nno signup needed — anyone with this URL can use the server. Press Ctrl-C to stop.\n",
+		ttl, base, resp.Tenant, resp.Service)
 
 	agentErr := make(chan error, 1)
 	go func() { agentErr <- agentClient.Run(ctx) }()
