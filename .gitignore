@@ -3,3 +3,7 @@ bin/
 *.db-wal
 *.db-shm
 .env
+data/
+pid
+*.log
+dist/

@@ -12,10 +12,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/agent"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/bridge"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/cli"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
+	"github.com/generalpiston/mcptunnels/internal/agent"
+	"github.com/generalpiston/mcptunnels/internal/bridge"
+	"github.com/generalpiston/mcptunnels/internal/cli"
+	"github.com/generalpiston/mcptunnels/internal/config"
 )
 
 // runExpose implements `mcptunnel expose [--server URL] -- <cmd>...`: it

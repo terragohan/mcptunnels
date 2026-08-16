@@ -18,8 +18,8 @@ import (
 	"github.com/coder/websocket"
 	"github.com/hashicorp/yamux"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/tunnelproto"
+	"github.com/generalpiston/mcptunnels/internal/config"
+	"github.com/generalpiston/mcptunnels/internal/tunnelproto"
 )
 
 // Client maintains an outbound tunnel to tunneld and forwards requests to the

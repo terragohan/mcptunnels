@@ -1,4 +1,4 @@
-module github.com/generalpiston/openai-tunnel-oauth
+module github.com/generalpiston/mcptunnels
 
 go 1.26.1
 

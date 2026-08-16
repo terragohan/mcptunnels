@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
+	"github.com/generalpiston/mcptunnels/internal/config"
 )
 
 // Client talks to the control-plane API under /api/v1.

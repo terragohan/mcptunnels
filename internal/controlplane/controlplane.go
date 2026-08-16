@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/store"
 )
 
 // QuickTTL is how long an anonymous quick-tunnel tenant lives before the

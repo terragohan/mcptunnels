@@ -13,7 +13,7 @@ import (
 	"net/http/httputil"
 	"strings"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/store"
 )
 
 // Dialer opens a connection to the agent serving a (tenant, service) pair.

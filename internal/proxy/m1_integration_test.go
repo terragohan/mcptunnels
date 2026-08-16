@@ -11,13 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/agent"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/gateway"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/proxy"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store/storetest"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/tunnelproto"
+	"github.com/generalpiston/mcptunnels/internal/agent"
+	"github.com/generalpiston/mcptunnels/internal/config"
+	"github.com/generalpiston/mcptunnels/internal/gateway"
+	"github.com/generalpiston/mcptunnels/internal/proxy"
+	"github.com/generalpiston/mcptunnels/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/store/storetest"
+	"github.com/generalpiston/mcptunnels/internal/tunnelproto"
 )
 
 // TestM1EndToEnd spins up tunneld (plain HTTP = "disabled" TLS mode), a dummy

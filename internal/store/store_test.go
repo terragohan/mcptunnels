@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store/storetest"
+	"github.com/generalpiston/mcptunnels/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/store/storetest"
 )
 
 func TestServicesAndAgentKeys(t *testing.T) {

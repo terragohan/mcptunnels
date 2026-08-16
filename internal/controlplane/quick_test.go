@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/controlplane"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store/storetest"
+	"github.com/generalpiston/mcptunnels/internal/controlplane"
+	"github.com/generalpiston/mcptunnels/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/store/storetest"
 )
 
 // api is a small test client for the control-plane handler.

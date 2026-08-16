@@ -18,12 +18,12 @@ import (
 
 	"golang.org/x/crypto/acme/autocert"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/config"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/controlplane"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/gateway"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/proxy"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/tunnelproto"
+	"github.com/generalpiston/mcptunnels/internal/config"
+	"github.com/generalpiston/mcptunnels/internal/controlplane"
+	"github.com/generalpiston/mcptunnels/internal/gateway"
+	"github.com/generalpiston/mcptunnels/internal/proxy"
+	"github.com/generalpiston/mcptunnels/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/tunnelproto"
 )
 
 func main() {

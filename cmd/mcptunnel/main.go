@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/cli"
+	"github.com/generalpiston/mcptunnels/internal/cli"
 )
 
 const usage = `usage: mcptunnel expose [--server URL | --config PATH] -- <mcp server command> [args...]

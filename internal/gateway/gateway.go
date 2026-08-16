@@ -15,8 +15,8 @@ import (
 	"github.com/coder/websocket"
 	"github.com/hashicorp/yamux"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
-	"github.com/generalpiston/openai-tunnel-oauth/internal/tunnelproto"
+	"github.com/generalpiston/mcptunnels/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/tunnelproto"
 )
 
 // ErrServiceOffline is returned by Dial when no agent tunnel is currently

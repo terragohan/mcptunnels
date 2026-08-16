@@ -1,4 +1,4 @@
-# openai-tunnel-oauth
+# mcptunnels
 
 Self-hosted quick tunnels for MCP servers, ngrok-style. `tunneld` runs on a
 public host; `mcptunnel expose -- <cmd>` runs a local stdio MCP server and
@@ -6,6 +6,23 @@ dials **outbound** to `tunneld` (WebSocket + yamux), which reverse-proxies
 public HTTP requests over that tunnel. There are no accounts: every tunnel is
 anonymous and ephemeral (24h TTL), and the unguessable URL is the only
 secret. See [DESIGN.md](DESIGN.md) for the architecture and threat model.
+
+## Install
+
+Prebuilt binaries for Linux and macOS (amd64/arm64) are attached to each
+[GitHub release](https://github.com/generalpiston/mcptunnels/releases).
+
+With Go installed:
+
+```sh
+go install github.com/generalpiston/mcptunnels/cmd/mcptunnel@latest
+```
+
+With Docker (tunneld server only):
+
+```sh
+docker build --target tunneld -t mcptunnels/tunneld .
+```
 
 ## Quickstart
 
@@ -46,53 +63,20 @@ Endpoints:
 Config (`tunneld.yaml`): `listen`, `public_base_url`, `tls` (acme / manual /
 disabled), `database_path` (SQLite). That's all.
 
-## Docker
+## Docs
 
-```sh
-docker build --target tunneld -t openai-tunnel-oauth/tunneld .
-# or: docker compose up -d   (SQLite-backed, config in ./data)
-```
-
-Multi-arch: the image is a distroless static binary and builds for any
-platform:
-
-```sh
-docker buildx build --platform linux/amd64,linux/arm64 \
-  --target tunneld -t openai-tunnel-oauth/tunneld .
-```
-
-### Bare-metal: Ubuntu 24.04 + user supervisord (no Docker)
-
-```sh
-git clone <this repo> && cd openai-tunnel-oauth
-bash scripts/setup-ubuntu-24.04.sh
-```
-
-The script installs a user-local Go toolchain, builds `tunneld` and
-`mcptunnel` into `~/tunneld/bin`, grants `cap_net_bind_service` so tunneld
-binds :443 as a normal user, opens 443 in ufw, and installs supervisord as a
-**user-level** systemd unit (`systemctl --user`, with lingering enabled so it
-starts at boot). No root daemon, no Docker. Then:
-
-```sh
-$EDITOR ~/tunneld/tunneld.yaml                 # public_base_url, acme.email
-systemctl --user start supervisord
-supervisorctl -c ~/tunneld/supervisord.conf status
-```
-
-All state is `~/tunneld/data/tunneld.db` — back it up with
-`sqlite3 ~/tunneld/data/tunneld.db ".backup 'backup.db'"` (throwaway state:
-quick tunnels only).
-
-## Production checklist
-
-- `public_base_url` = `https://your-host`, `tls.mode: acme`, ACME email set;
-  only port 443 inbound (TLS-ALPN-01 needs no :80).
-- Remember: every tunnel URL is unauthenticated. Tunnels are for sharing
-  throwaway MCP servers, not private data.
+- [docs/self-hosting.md](docs/self-hosting.md) — run tunneld in production
+  (ACME, Docker, Ubuntu 24.04, backups).
+- [docs/security.md](docs/security.md) — threat model and trust assumptions.
+- [docs/troubleshooting.md](docs/troubleshooting.md) — common failure modes.
+- [DESIGN.md](DESIGN.md) — architecture and design rationale.
 
 ## Tests
 
 ```sh
 go test ./...
 ```
+
+## License
+
+[Apache 2.0](LICENSE). Security reports: see [SECURITY.md](SECURITY.md).

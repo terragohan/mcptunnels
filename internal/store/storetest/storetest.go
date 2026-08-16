@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/generalpiston/openai-tunnel-oauth/internal/store"
+	"github.com/generalpiston/mcptunnels/internal/store"
 )
 
 // Open opens a migrated store on a fresh SQLite database in t.TempDir() and

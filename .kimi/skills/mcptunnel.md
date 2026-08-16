@@ -1,6 +1,6 @@
 ---
 name: mcptunnel
-description: Expose local MCP servers through the openai-tunnel-oauth quick-tunnel service (tunneld) with `mcptunnel expose` — anonymous, ephemeral (24h) public URLs, no accounts. Use when deploying, configuring, or troubleshooting tunneld or tunnel connections.
+description: Expose local MCP servers through the mcptunnels quick-tunnel service (tunneld) with `mcptunnel expose` — anonymous, ephemeral (24h) public URLs, no accounts. Use when deploying, configuring, or troubleshooting tunneld or tunnel connections.
 ---
 
 # mcptunnel — quick-tunnel CLI

@@ -1,4 +1,4 @@
-# openai-tunnel-oauth — Design (quick tunnels)
+# mcptunnels — Design (quick tunnels)
 
 ## 1. Problem
 
