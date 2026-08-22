@@ -1,5 +1,7 @@
 # mcptunnels
 
+**Website & docs: [terragohan.github.io/mcptunnels](https://terragohan.github.io/mcptunnels)**
+
 **Give a local MCP server a public URL with one command.** No accounts, no
 signup, no config files — tunnels are anonymous, expire after 24 hours, and
 are OAuth 2.1-protected by default behind a generated password (`--no-auth`
