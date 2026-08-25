@@ -1,0 +1,102 @@
+---
+title: Roadmap
+description: Where mcptunnels is headed — shipped features, planned permanent tunnels, and future directions.
+---
+
+import { Badge, Card, CardGrid, Aside } from '@astrojs/starlight/components';
+
+Where mcptunnels is headed. Roughly ordered; no dates — this is a spare-time project and priorities follow real user pain.
+
+## v0.1 — MVP (today)
+
+<Badge text="Shipped" variant="success" />
+
+The foundation that exists now: anonymous, ephemeral tunnels with zero setup.
+
+<CardGrid stagger>
+	<Card title="One command" icon="rocket">
+		`mcptunnel expose -- <cmd>` spawns any stdio MCP server and gives it a public URL.
+	</Card>
+	<Card title="No accounts" icon="approve-check">
+		No signup, no login. OAuth 2.1 is on by default behind a CLI-generated password; `--no-auth` for open URLs.
+	</Card>
+	<Card title="Ephemeral by design" icon="warning">
+		Tunnels expire after 24 hours. A janitor sweeps expired tenants, and Ctrl-C deletes a tunnel immediately.
+	</Card>
+	<Card title="Self-hostable relay" icon="seti:config">
+		`tunneld` is a single binary plus SQLite, with ACME TLS and Docker or bare-metal deployment.
+	</Card>
+	<Card title="Tested data plane" icon="seti:checklist">
+		End-to-end tests cover the WebSocket + yamux proxy, stdio bridge, SSE streaming, and automatic agent reconnect.
+	</Card>
+</CardGrid>
+
+## Next: permanent tunnels
+
+<Badge text="Planned" variant="caution" />
+
+The MVP's ephemerality is the feature that lets us skip accounts — and the first thing real users will outgrow.
+
+<CardGrid stagger>
+	<Card title="Named, stable URLs" icon="seti:html">
+		Claim `/<you>/<name>` once and keep it across restarts, reboots, and laptop sleeps.
+	</Card>
+	<Card title="Minimal identity" icon="seti:lock">
+		The smallest possible account system, likely invite/token-based signup via the CLI — no web app.
+	</Card>
+	<Card title="Multiple services" icon="seti:json">
+		One identity can host several services, each with its own stable URL and independent agent keys.
+	</Card>
+	<Card title="CLI lifecycle" icon="terminal">
+		List, rotate keys, revoke, and delete services directly from the command line.
+	</Card>
+</CardGrid>
+
+## Then: MCP servers as scalable HTTP services
+
+<Badge text="Future" variant="default" />
+
+Today `expose` bolts a public URL onto a single local process. The bigger destination is making MCP servers easy to *run and scale* as Streamable HTTP services — not just reachable, but deployable.
+
+<CardGrid stagger>
+	<Card title="stdio → HTTP framework" icon="seti:go">
+		The bridge inside `expose` becomes a reusable library/thin runtime: take any stdio MCP server and serve it as a proper Streamable HTTP endpoint behind a load balancer.
+	</Card>
+	<Card title="Deployment targets" icon="seti:docker">
+		Opinionated recipes — and eventually adapters — for containers, VMs, and edge platforms like Cloudflare Workers.
+	</Card>
+	<Card title="Lifecycle handled once" icon="seti:clock">
+		Streamable HTTP sessions, stateless vs. stateful modes, and horizontal scaling semantics solved in one place instead of re-derived by every server author.
+	</Card>
+	<Card title="Graduation path" icon="seti:debug">
+		Develop against a quick tunnel on your laptop, then deploy the same server to real infrastructure with the same transport.
+	</Card>
+</CardGrid>
+
+## Later: richer OAuth
+
+<Badge text="Future" variant="default" />
+
+Per-tunnel OAuth 2.1 (discovery metadata, DCR, PKCE) shipped with the MVP. What comes later:
+
+<CardGrid stagger>
+	<Card title="Pluggable identity" icon="seti:user">
+		Today it's a per-tunnel password/login page; later, bring-your-own IdP (Google, GitHub, enterprise OIDC).
+	</Card>
+	<Card title="Audience isolation" icon="seti:shield">
+		Tokens scoped to a single tunnel so one compromised credential can't roam.
+	</Card>
+	<Card title="Identity pass-through" icon="seti:arrow-right">
+		Forward identity headers to the local server so it can make per-user decisions without implementing OAuth itself.
+	</Card>
+</CardGrid>
+
+<Aside type="caution" title="Explicit non-goals (for now)">
+- Generic TCP/HTTP tunneling of non-MCP services (ngrok's job, done well).
+- A hosted, billing-backed SaaS. (There is a default public relay at `https://tunnel.mcptunnels.xyz` for convenience — it's free and best-effort, and self-hosting stays a first-class path.)
+- A web dashboard.
+</Aside>
+
+<Aside type="tip" title="How to influence this">
+[File an issue](https://github.com/terragohan/mcptunnels/issues) describing your use case — especially if the MVP's 24h model is the thing blocking you. That's the signal that permanent tunnels should move up.
+</Aside>

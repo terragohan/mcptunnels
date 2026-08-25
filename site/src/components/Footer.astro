@@ -1,0 +1,29 @@
+---
+import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
+---
+
+<DefaultFooter />
+
+<div class="terragohan-credit">
+	<a href="https://terragohan.com" target="_blank" rel="noopener">
+		Developed with love by terragohan — and by "love" we mean caffeine, spite, and one (1)
+		nervous breakdown.
+	</a>
+</div>
+
+<style>
+	.terragohan-credit {
+		text-align: center;
+		padding: 1rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.terragohan-credit a {
+		color: inherit;
+		text-decoration: none;
+	}
+	.terragohan-credit a:hover {
+		color: var(--sl-color-white);
+		text-decoration: underline;
+	}
+</style>
