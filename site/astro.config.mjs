@@ -9,6 +9,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			pagefind: false,
+			customCss: ['./src/styles/custom.css'],
 			title: 'mcptunnels',
 			description:
 				'Give a local MCP server a public URL with one command. Anonymous, ephemeral, OAuth 2.1-protected tunnels for MCP servers.',
@@ -25,6 +26,7 @@ export default defineConfig({
 			components: {
 				Header: './src/components/Header.astro',
 				Footer: './src/components/Footer.astro',
+				ThemeProvider: './src/components/ThemeProvider.astro',
 			},
 			sidebar: [
 				{ label: 'Get started', slug: 'get-started' },
@@ -32,7 +34,6 @@ export default defineConfig({
 				{ label: 'Self-hosting', slug: 'self-hosting' },
 				{ label: 'Security', slug: 'security' },
 				{ label: 'FAQ', slug: 'faq' },
-				{ label: 'Roadmap', slug: 'roadmap' },
 			],
 		}),
 	],

@@ -4,8 +4,6 @@ description: Give a local MCP server a public URL with one command. No accounts,
 template: splash
 hero:
   tagline: Give a local MCP server a public URL with one command. No accounts, no signup — tunnels are anonymous, expire after 24 hours, and are OAuth 2.1-protected by default.
-  image:
-    html: '<img src="/mcptunnels/demo.gif" alt="Terminal demo of mcptunnel expose" style="border-radius: 0.5rem; box-shadow: var(--sl-shadow-md);" />'
   actions:
     - text: Get started
       link: /mcptunnels/get-started/
@@ -16,7 +14,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+<img src="/mcptunnels/demo.gif" alt="Terminal demo of mcptunnel expose" class="demo-gif" />
 
 ```sh
 mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
@@ -24,24 +22,24 @@ mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
 #   password: 9f2c1ab4e7d03815a6c02b94
 ```
 
-<CardGrid stagger>
-	<Card title="One command" icon="rocket">
-		`mcptunnel expose -- <your MCP server>` spawns any stdio MCP server, bridges it to
-		Streamable HTTP, and prints a public URL. Nothing to deploy.
-	</Card>
-	<Card title="No accounts" icon="approve-check">
-		No signup, no login, no config files. The hosted relay at
-		`tunnel.mcptunnels.xyz` is the default — or self-host your own `tunneld`.
-	</Card>
-	<Card title="OAuth 2.1 by default" icon="seti:lock">
-		Public endpoints are gated behind a password the CLI generates. Clients like ChatGPT,
-		Claude, and Cursor discover the OAuth flow automatically. `--no-auth` for open URLs.
-	</Card>
-	<Card title="Ephemeral by design" icon="warning">
-		Tunnels live for 24 hours, then they're gone. Ctrl-C deletes the tunnel server-side
-		immediately — the URL and password die with your process.
-	</Card>
-</CardGrid>
+<div class="feature-grid">
+	<article>
+		<h3>One command</h3>
+		<p>`mcptunnel expose -- <your MCP server>` spawns any stdio MCP server, bridges it to Streamable HTTP, and prints a public URL. Nothing to deploy.</p>
+	</article>
+	<article>
+		<h3>No accounts</h3>
+		<p>No signup, no login, no config files. The hosted relay at `tunnel.mcptunnels.xyz` is the default — or self-host your own `tunneld`.</p>
+	</article>
+	<article>
+		<h3>OAuth 2.1 by default</h3>
+		<p>Public endpoints are gated behind a password the CLI generates. Clients like ChatGPT, Claude, and Cursor discover the OAuth flow automatically. `--no-auth` for open URLs.</p>
+	</article>
+	<article>
+		<h3>Ephemeral by design</h3>
+		<p>Tunnels live for 24 hours, then they're gone. Ctrl-C deletes the tunnel server-side immediately — the URL and password die with your process.</p>
+	</article>
+</div>
 
 ## Use it to
 
@@ -69,6 +67,91 @@ All tunnel traffic transits the relay operator, and `--no-auth` URLs are unauthe
 Expose throwaway servers only — never private data. See [Security](/mcptunnels/security/).
 :::
 
-**Status: early beta.** The tunnel data plane is covered by end-to-end tests; compatibility
+**Status: v1.** The tunnel data plane is covered by end-to-end tests; compatibility
 with every major hosted MCP client is not yet exhaustively verified. Bug reports welcome on
 [GitHub](https://github.com/terragohan/mcptunnels/issues).
+
+<div class="roadmap-section">
+
+## Roadmap
+
+Where mcptunnels is headed. Roughly ordered; no dates — this is a spare-time project and
+priorities follow real user pain.
+
+<div class="roadmap-grid">
+	<article class="roadmap-card shipped">
+		<div class="roadmap-card-accent"></div>
+		<div class="roadmap-card-header">
+			<span class="roadmap-phase-num">01</span>
+			<span class="roadmap-status">Shipped</span>
+		</div>
+		<h3>v1 — MVP</h3>
+		<ul>
+			<li>Anonymous quick tunnels: <code>mcptunnel expose -- &lt;cmd&gt;</code> → public URL.</li>
+			<li>No accounts; OAuth 2.1 by default behind a CLI-generated password (<code>--no-auth</code> for open URLs).</li>
+			<li>24h TTL; a janitor sweeps expired tenants.</li>
+			<li>Self-hosted <code>tunneld</code>: single binary + SQLite, ACME TLS, Docker or bare-metal.</li>
+			<li>End-to-end tested data plane: WebSocket + yamux proxy, stdio bridge, SSE streaming, automatic reconnect.</li>
+		</ul>
+	</article>
+	<article class="roadmap-card planned">
+		<div class="roadmap-card-accent"></div>
+		<div class="roadmap-card-header">
+			<span class="roadmap-phase-num">02</span>
+			<span class="roadmap-status">Planned</span>
+		</div>
+		<h3>Next: permanent tunnels</h3>
+		<p>The MVP's ephemerality is the feature that lets us skip accounts — and the first thing real users will outgrow.</p>
+		<ul>
+			<li><strong>Named, stable URLs.</strong> Claim <code>/&lt;you&gt;/&lt;name&gt;</code> once, keep it across restarts, reboots, and laptop sleeps.</li>
+			<li><strong>Minimal identity.</strong> Invite/token-based signup via the CLI — no web app.</li>
+			<li><strong>Multiple services per identity</strong>, each with its own stable URL and independent agent keys.</li>
+			<li><strong>CLI lifecycle:</strong> list, rotate keys, revoke, delete.</li>
+		</ul>
+	</article>
+	<article class="roadmap-card future">
+		<div class="roadmap-card-accent"></div>
+		<div class="roadmap-card-header">
+			<span class="roadmap-phase-num">03</span>
+			<span class="roadmap-status">Future</span>
+		</div>
+		<h3>Then: scalable HTTP services</h3>
+		<p>Today <code>expose</code> bolts a public URL onto a single local process. The destination is making MCP servers easy to <em>run and scale</em> as Streamable HTTP services.</p>
+		<ul>
+			<li><strong>stdio → HTTP framework.</strong> Embed the bridge as a library: serve any stdio MCP server as Streamable HTTP behind a load balancer.</li>
+			<li><strong>Deployment targets.</strong> Recipes and adapters for containers, VMs, and edge platforms like Cloudflare Workers.</li>
+			<li><strong>Lifecycle handled once.</strong> Sessions, stateless vs. stateful modes, horizontal scaling semantics solved in one place.</li>
+			<li><strong>Graduation path.</strong> Develop against a quick tunnel; deploy to real infrastructure with the same transport.</li>
+		</ul>
+	</article>
+	<article class="roadmap-card future">
+		<div class="roadmap-card-accent"></div>
+		<div class="roadmap-card-header">
+			<span class="roadmap-phase-num">04</span>
+			<span class="roadmap-status">Future</span>
+		</div>
+		<h3>Later: richer OAuth</h3>
+		<p>Per-tunnel OAuth 2.1 (discovery metadata, DCR, PKCE) shipped with the MVP. What comes later:</p>
+		<ul>
+			<li><strong>Pluggable identity.</strong> Today it's a per-tunnel password page; later, bring-your-own IdP (Google, GitHub, enterprise OIDC).</li>
+			<li><strong>Audience isolation.</strong> Tokens scoped to a single tunnel so one compromised credential can't roam.</li>
+			<li><strong>Identity pass-through.</strong> Forward identity headers to the local server so it can make per-user decisions without OAuth code.</li>
+		</ul>
+	</article>
+</div>
+
+### Explicit non-goals (for now)
+
+- Generic TCP/HTTP tunneling of non-MCP services (ngrok's job, done well).
+- A hosted, billing-backed SaaS. (There is a default public relay at
+  `https://tunnel.mcptunnels.xyz` for convenience — it's free and best-effort, and self-hosting
+  stays a first-class path.)
+- A web dashboard.
+
+### How to influence this
+
+[File an issue](https://github.com/terragohan/mcptunnels/issues) describing your use case —
+especially if the MVP's 24h model is the thing blocking you. That's the signal that permanent
+tunnels should move up.
+
+</div>
