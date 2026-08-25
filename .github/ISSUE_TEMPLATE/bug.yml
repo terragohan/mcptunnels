@@ -1,0 +1,21 @@
+name: Bug report
+description: Report something broken in mcptunnel or tunneld
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error output
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: mcptunnel/tunneld version or commit
