@@ -1,0 +1,16 @@
+bin/
+*.db
+*.db-wal
+*.db-shm
+.env
+data/
+pid
+*.log
+dist/
+.local/
+
+# Website
+site/node_modules/
+site/dist/
+site/.astro/
+site/.env
