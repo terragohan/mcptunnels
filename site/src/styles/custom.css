@@ -1,0 +1,605 @@
+:root,
+[data-theme='light'],
+[data-theme='dark'] {
+	--sl-color-white: #ffffff;
+	--sl-color-black: #111111;
+
+	--sl-color-gray-1: #fafafa;
+	--sl-color-gray-2: #f5f5f5;
+	--sl-color-gray-3: #e5e5e5;
+	--sl-color-gray-4: #d4d4d4;
+	--sl-color-gray-5: #a3a3a3;
+	--sl-color-gray-6: #737373;
+	--sl-color-gray-7: #525252;
+
+	--sl-color-accent-low: #f5f5f5;
+	--sl-color-accent: #111111;
+	--sl-color-accent-high: #000000;
+
+	--sl-color-bg: #ffffff;
+	--sl-color-bg-nav: #ffffff;
+	--sl-color-bg-sidebar: #ffffff;
+	--sl-color-bg-inline-code: #f5f5f5;
+	--sl-color-bg-hover: #f5f5f5;
+
+	--sl-color-text: #111111;
+	--sl-color-text-accent: #111111;
+	--sl-color-text-invert: #ffffff;
+
+	--sl-color-border: #e5e5e5;
+	--sl-color-hairline: #e5e5e5;
+	--sl-color-hairline-shade: #f5f5f5;
+
+	--sl-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--sl-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+	--sl-font-system: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+	color-scheme: light;
+}
+
+/* Starlight uses --sl-color-white as text and --sl-color-black as background in dark mode.
+   Invert them so the site stays light even if the html element carries data-theme="dark". */
+[data-theme='dark'] {
+	--sl-color-white: #111111;
+	--sl-color-black: #ffffff;
+	--sl-color-text: #111111;
+	--sl-color-text-invert: #111111;
+	--sl-color-bg: #ffffff;
+	--sl-color-bg-nav: #ffffff;
+	--sl-color-bg-sidebar: #ffffff;
+}
+
+html {
+	background: #ffffff;
+}
+
+body {
+	font-family: var(--sl-font);
+	color: #111111;
+	background: #ffffff;
+	line-height: 1.6;
+}
+
+/* Centered layout */
+/* Let Starlight's splash layout handle the frame; center the content panels. */
+.sl-container {
+	margin-inline: auto;
+}
+
+/* On the homepage, center all markdown headings and keep prose readable. */
+.sl-markdown-content {
+	text-align: center;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4 {
+	text-align: center;
+}
+
+.sl-markdown-content p,
+.sl-markdown-content li,
+.sl-markdown-content td,
+.sl-markdown-content th {
+	text-align: left;
+}
+
+.sl-markdown-content ul,
+.sl-markdown-content ol {
+	display: inline-block;
+	text-align: left;
+}
+
+/* Header */
+.header {
+	background: #ffffff;
+	border-bottom: 1px solid #e5e5e5;
+	box-shadow: none;
+}
+
+.header .site-title {
+	font-family: var(--sl-font-mono);
+	font-weight: 600;
+	color: #111111;
+	font-size: 1rem;
+}
+
+.header a {
+	color: #111111;
+	text-decoration: none;
+}
+
+.header a:hover {
+	text-decoration: underline;
+}
+
+.terragohan-header-link {
+	font-size: 0.875rem;
+	color: #737373;
+	font-family: var(--sl-font);
+}
+
+.terragohan-header-link:hover {
+	color: #111111;
+}
+
+/* Hide theme picker — light only */
+starlight-theme-select,
+.mobile-preferences starlight-theme-select {
+	display: none !important;
+}
+
+/* Sidebar */
+.sidebar {
+	background: #ffffff;
+	border-right: 1px solid #e5e5e5;
+}
+
+.sidebar .top-level a {
+	color: #525252;
+	font-size: 0.875rem;
+	padding: 0.4rem 0.75rem;
+	border-radius: 0;
+}
+
+.sidebar .top-level a:hover,
+.sidebar .top-level a[aria-current='page'] {
+	background: #f5f5f5;
+	color: #111111;
+}
+
+.sidebar .top-level a[aria-current='page'] {
+	font-weight: 500;
+}
+
+/* Right sidebar / TOC */
+.right-sidebar {
+	background: #ffffff;
+}
+
+.right-sidebar a {
+	color: #737373;
+	font-size: 0.875rem;
+}
+
+.right-sidebar a:hover {
+	color: #111111;
+}
+
+/* Main content */
+.main-frame {
+	background: #ffffff;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4 {
+	font-family: var(--sl-font-mono);
+	font-weight: 600;
+	color: #111111;
+	letter-spacing: -0.02em;
+}
+
+.sl-markdown-content h1 {
+	font-size: 2.25rem;
+	margin-top: 0;
+}
+
+.sl-markdown-content h2 {
+	font-size: 1.5rem;
+	border-bottom: 1px solid #e5e5e5;
+	padding-bottom: 0.5rem;
+	margin-top: 2.5rem;
+}
+
+.sl-markdown-content h3 {
+	font-size: 1.125rem;
+	margin-top: 2rem;
+}
+
+.sl-markdown-content p,
+.sl-markdown-content li {
+	color: #1a1a1a;
+}
+
+.sl-markdown-content a {
+	color: #111111;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+.sl-markdown-content a:hover {
+	color: #525252;
+}
+
+/* Code */
+.sl-markdown-content code {
+	font-family: var(--sl-font-mono);
+	background: #f5f5f5;
+	color: #111111;
+	padding: 0.15em 0.35em;
+	border-radius: 0;
+	border: 1px solid #e5e5e5;
+	font-size: 0.875em;
+}
+
+.sl-markdown-content pre {
+	background: #f5f5f5;
+	border: 1px solid #e5e5e5;
+	border-radius: 0;
+	padding: 1rem;
+	overflow-x: auto;
+}
+
+.sl-markdown-content pre code {
+	background: transparent;
+	border: none;
+	padding: 0;
+}
+
+/* Tables */
+.sl-markdown-content table {
+	border-collapse: collapse;
+	width: 100%;
+	max-width: 48rem;
+	margin: 1.5rem auto;
+	font-size: 0.9375rem;
+}
+
+.sl-markdown-content th,
+.sl-markdown-content td {
+	border: 1px solid #e5e5e5;
+	padding: 0.6rem 0.75rem;
+	text-align: center;
+}
+
+.sl-markdown-content th {
+	background: #f5f5f5;
+	font-family: var(--sl-font-mono);
+	font-weight: 600;
+	color: #111111;
+}
+
+.sl-markdown-content td:first-child,
+.sl-markdown-content th:first-child {
+	text-align: left;
+}
+
+/* Asides / cautions */
+.sl-markdown-content .starlight-aside {
+	background: #f5f5f5;
+	border: 1px solid #e5e5e5;
+	border-radius: 0;
+	padding: 1rem;
+	margin: 1.5rem 0;
+	color: #111111;
+}
+
+.sl-markdown-content .starlight-aside__title {
+	font-family: var(--sl-font-mono);
+	font-weight: 600;
+	color: #111111;
+}
+
+.sl-markdown-content .starlight-aside__content {
+	color: #111111;
+}
+
+/* Lists */
+.sl-markdown-content ul,
+.sl-markdown-content ol {
+	padding-left: 1.5rem;
+}
+
+.sl-markdown-content li::marker {
+	color: #737373;
+}
+
+/* Footer */
+footer.astro-xhxjzfa7,
+footer {
+	background: #ffffff;
+	border-top: 1px solid #e5e5e5;
+	padding: 1.5rem 0;
+	margin-top: 3rem;
+}
+
+.terragohan-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.875rem;
+	color: #737373;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.terragohan-footer a {
+	color: #737373;
+	text-decoration: none;
+}
+
+.terragohan-footer a:hover {
+	color: #111111;
+	text-decoration: underline;
+}
+
+/* Homepage hero */
+.hero {
+	background: #ffffff;
+	padding: 3rem 0;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.hero h1 {
+	color: #111111;
+}
+
+.hero .stack {
+	text-align: center;
+}
+
+.hero .copy {
+	align-items: center;
+}
+
+.hero .tagline {
+	color: #525252;
+	font-size: 1.125rem;
+	max-width: 50ch;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.hero .actions {
+	margin-top: 1.5rem;
+	justify-content: center;
+}
+
+/* Center block-level content */
+.sl-markdown-content pre,
+.sl-markdown-content .starlight-aside,
+.sl-markdown-content .expressive-code {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+
+.hero .actions a {
+	font-family: var(--sl-font-mono);
+	border: 1px solid #111111;
+	background: #111111;
+	color: #ffffff;
+	padding: 0.5rem 1rem;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.hero .actions a[variant='minimal'] {
+	background: transparent;
+	color: #111111;
+}
+
+.hero .actions a:hover {
+	background: #333333;
+}
+
+.hero .actions a[variant='minimal']:hover {
+	background: #f5f5f5;
+}
+
+/* Feature grid on homepage */
+.feature-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+	gap: 1rem;
+	margin: 1.5rem auto;
+	max-width: 48rem;
+	text-align: left;
+}
+
+.feature-grid article {
+	border: 1px solid #e5e5e5;
+	padding: 1rem;
+	background: #ffffff;
+	text-align: left;
+}
+
+.feature-grid h3 {
+	font-family: var(--sl-font-mono);
+	font-size: 1rem;
+	font-weight: 600;
+	margin: 0 0 0.5rem 0;
+	border-bottom: none;
+	padding-bottom: 0;
+	text-align: left;
+}
+
+.feature-grid p {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: #525252;
+	text-align: left;
+}
+
+/* Demo GIF */
+.demo-gif {
+	display: block;
+	width: 100%;
+	max-width: 42rem;
+	margin: 0 auto 1.5rem auto;
+	border: 1px solid #e5e5e5;
+}
+
+/* Roadmap bento grid */
+.roadmap-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+	margin: 2rem auto;
+	max-width: 52rem;
+	text-align: left;
+}
+
+@media (max-width: 50rem) {
+	.roadmap-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.roadmap-card {
+	position: relative;
+	border: 1px solid #e5e5e5;
+	background: #ffffff;
+	padding: 1.5rem;
+	overflow: hidden;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	text-align: left;
+}
+
+.roadmap-card:hover {
+	border-color: #d4d4d4;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.roadmap-card-accent {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+}
+
+.roadmap-card.shipped .roadmap-card-accent {
+	background: #111111;
+}
+
+.roadmap-card.planned .roadmap-card-accent {
+	background: #737373;
+}
+
+.roadmap-card.future .roadmap-card-accent {
+	background: #e5e5e5;
+}
+
+.roadmap-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+	gap: 1rem;
+}
+
+.roadmap-phase-num {
+	font-family: var(--sl-font-mono);
+	font-size: 2rem;
+	font-weight: 300;
+	color: #e5e5e5;
+	line-height: 1;
+}
+
+.roadmap-card.shipped .roadmap-phase-num {
+	color: #111111;
+}
+
+.roadmap-card.planned .roadmap-phase-num {
+	color: #737373;
+}
+
+.roadmap-status {
+	font-family: var(--sl-font-mono);
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 0.25rem 0.6rem;
+	border: 1px solid #e5e5e5;
+	white-space: nowrap;
+}
+
+.roadmap-card.shipped .roadmap-status {
+	background: #111111;
+	color: #ffffff;
+	border-color: #111111;
+}
+
+.roadmap-card.planned .roadmap-status {
+	background: #f5f5f5;
+	color: #111111;
+	border-color: #111111;
+}
+
+.roadmap-card.future .roadmap-status {
+	background: #fafafa;
+	color: #737373;
+	border-color: #e5e5e5;
+}
+
+.roadmap-card h3 {
+	font-family: var(--sl-font-mono);
+	font-size: 1.125rem;
+	font-weight: 600;
+	margin: 0 0 0.75rem 0;
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.roadmap-card p {
+	color: #525252;
+	font-size: 0.9375rem;
+	margin: 0 0 0.75rem 0;
+}
+
+.roadmap-card ul {
+	padding-left: 1.25rem;
+	margin: 0;
+}
+
+.roadmap-card li {
+	margin-bottom: 0.4rem;
+	font-size: 0.9375rem;
+}
+
+.roadmap-card li:last-child {
+	margin-bottom: 0;
+}
+
+.roadmap-card code {
+	font-size: 0.85em;
+}
+
+/* Mobile menu */
+starlight-menu-button button {
+	color: #111111;
+}
+
+/* Pagination links */
+.pagination-links a {
+	border: 1px solid #e5e5e5;
+	border-radius: 0;
+	padding: 0.75rem;
+	color: #111111;
+}
+
+.pagination-links a:hover {
+	background: #f5f5f5;
+}
+
+/* Edit page link */
+.edit-link {
+	color: #737373;
+	font-size: 0.875rem;
+}
+
+/* Skip link */
+.sl-skip-link {
+	background: #111111;
+	color: #ffffff;
+}

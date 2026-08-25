@@ -3,7 +3,7 @@
 Where mcptunnels is headed. Roughly ordered; no dates — this is a spare-time
 project and priorities follow real user pain.
 
-## v0.1 — MVP (today)
+## v1 — MVP
 
 - Anonymous quick tunnels: `mcptunnel expose -- <cmd>` → public URL.
 - No accounts; OAuth 2.1 by default behind a CLI-generated password (`--no-auth` for open URLs).

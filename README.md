@@ -20,7 +20,7 @@ test a server against a real client without deploying anything.
 
 ![demo](assets/demo.gif)
 
-**Status: early beta.** The tunnel data plane is covered by end-to-end
+**Status: v1.** The tunnel data plane is covered by end-to-end
 tests; compatibility with every major hosted MCP client is not yet
 exhaustively verified. Bug reports welcome. See [ROADMAP.md](ROADMAP.md) for
 where the project is headed (permanent tunnels, MCP servers as scalable
