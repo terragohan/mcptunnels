@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -20,16 +21,20 @@ import (
 	"github.com/terragohan/mcptunnels/internal/config"
 )
 
-// runExpose implements `mcptunnel expose [--server URL] -- <cmd>...`: it
-// creates an anonymous quick tunnel via POST /api/v1/quick, runs the given
-// stdio MCP server command behind a local HTTP bridge, and connects the
-// tunnel agent — one command from local MCP server to public endpoint,
-// ngrok-style.
-//
-// OAuth is on by default: a random password is generated, sent to tunneld,
-// and printed. The OAuth authorize endpoint requires it. --no-auth skips
-// both. On Ctrl-C the tunnel is deleted via DELETE /api/v1/quick/{tenant}.
-func runExpose(w io.Writer, args []string) error {
+// exposeOpts is the parsed form of the `mcptunnel expose` flags.
+type exposeOpts struct {
+	server      string
+	configPath  string
+	noAuth      bool
+	upstreamURL string // --url mode; empty means stdio command mode
+	headers     http.Header
+	cmdArgs     []string // stdio MCP server command, everything after "--"
+}
+
+// parseExposeArgs splits args at "--" (everything after it is the MCP server
+// command) and validates the flag combination. Usage problems come back as
+// cli.UsageError.
+func parseExposeArgs(args []string) (exposeOpts, error) {
 	// Everything after "--" is the MCP server command.
 	flagArgs, cmdArgs := args, []string(nil)
 	for i, a := range args {
@@ -39,29 +44,61 @@ func runExpose(w io.Writer, args []string) error {
 		}
 	}
 
+	opts := exposeOpts{server: cli.DefaultServer, headers: http.Header{}}
 	fs := cli.NewFlagSet("expose")
-	server := fs.String("server", cli.DefaultServer, "tunneld base URL (defaults to the hosted "+cli.DefaultServer+")")
-	configPath := fs.String("config", "", "tunneld.yaml to read the server URL from (same-host use)")
-	noAuth := fs.Bool("no-auth", false, "disable OAuth on the public endpoint (anyone with the URL can use it)")
+	fs.StringVar(&opts.server, "server", cli.DefaultServer, "tunneld base URL (defaults to the hosted "+cli.DefaultServer+")")
+	fs.StringVar(&opts.configPath, "config", "", "tunneld.yaml to read the server URL from (same-host use)")
+	fs.BoolVar(&opts.noAuth, "no-auth", false, "disable OAuth on the public endpoint (anyone with the URL can use it)")
+	fs.StringVar(&opts.upstreamURL, "url", "", "expose a remote HTTP MCP server at this URL instead of a local command")
+	fs.Var(headerFlag(opts.headers), "header", "header to send to the upstream, \"Name: value\" (repeatable)")
 	pos, err := cli.ParseIntermixed(fs, flagArgs)
 	if err != nil {
-		return cli.Usagef("%v", err)
+		return exposeOpts{}, cli.Usagef("%v", err)
 	}
-	if len(pos) > 0 || len(cmdArgs) == 0 {
-		return cli.Usagef("usage: mcptunnel expose [--server URL | --config PATH] [--no-auth] -- <mcp server command> [args...]")
+	switch {
+	case len(pos) > 0:
+		return exposeOpts{}, cli.Usagef("unexpected argument %q (flags go before the command; the MCP server command goes after --)", pos[0])
+	case opts.upstreamURL != "" && len(cmdArgs) > 0:
+		return exposeOpts{}, cli.Usagef("--url and a command are mutually exclusive")
+	case opts.upstreamURL == "" && len(cmdArgs) == 0:
+		return exposeOpts{}, cli.Usagef("usage: mcptunnel expose [--server URL | --config PATH] [--no-auth] [--header \"Name: value\"]... (-- <mcp server command> [args...] | --url URL)")
+	}
+	if opts.upstreamURL != "" {
+		u, err := url.Parse(opts.upstreamURL)
+		if err != nil || u.Scheme == "" || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") {
+			return exposeOpts{}, cli.Usagef("--url must be an absolute http(s) URL, got %q", opts.upstreamURL)
+		}
+	}
+	opts.cmdArgs = cmdArgs
+	return opts, nil
+}
+
+// runExpose implements `mcptunnel expose [--server URL] (-- <cmd>... | --url URL)`:
+// it creates an anonymous quick tunnel via POST /api/v1/quick and connects the
+// tunnel agent to an upstream — either the given local stdio MCP server
+// command behind a loopback HTTP bridge, or a remote HTTP MCP server URL.
+// ngrok-style, one command from MCP server to public endpoint.
+//
+// OAuth is on by default: a random password is generated, sent to tunneld,
+// and printed. The OAuth authorize endpoint requires it. --no-auth skips
+// both. On Ctrl-C the tunnel is deleted via DELETE /api/v1/quick/{tenant}.
+func runExpose(w io.Writer, args []string) error {
+	opts, err := parseExposeArgs(args)
+	if err != nil {
+		return err
 	}
 
 	// --config wins only when --server was left at the hosted default.
-	base := *server
-	if base == cli.DefaultServer && *configPath != "" {
-		s, err := cli.ServerFromConfig(*configPath)
+	base := opts.server
+	if base == cli.DefaultServer && opts.configPath != "" {
+		s, err := cli.ServerFromConfig(opts.configPath)
 		if err != nil {
 			return err
 		}
 		base = s
 	}
 
-	auth := !*noAuth
+	auth := !opts.noAuth
 
 	// Generate the authorize password when OAuth is on.
 	var password string
@@ -91,28 +128,41 @@ func runExpose(w io.Writer, args []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	// Spawn the MCP server and bridge it to a loopback HTTP endpoint.
-	b, err := bridge.Start(ctx, cmdArgs[0], cmdArgs[1:]...)
-	if err != nil {
-		return fmt.Errorf("starting mcp server: %w", err)
-	}
-	defer b.Close()
+	// Resolve the upstream: a local stdio MCP server behind the loopback
+	// bridge, or a remote URL given via --url.
+	upstream := opts.upstreamURL
+	var b *bridge.Server
+	if upstream == "" {
+		bb, err := bridge.Start(ctx, opts.cmdArgs[0], opts.cmdArgs[1:]...)
+		if err != nil {
+			return fmt.Errorf("starting mcp server: %w", err)
+		}
+		b = bb
+		defer b.Close()
 
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		return err
+		ln, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			return err
+		}
+		defer ln.Close()
+		httpSrv := &http.Server{Handler: b}
+		go httpSrv.Serve(ln)
+		defer httpSrv.Close()
+		upstream = "http://" + ln.Addr().String()
 	}
-	defer ln.Close()
-	httpSrv := &http.Server{Handler: b}
-	go httpSrv.Serve(ln)
-	defer httpSrv.Close()
 
 	cfg := &config.AgentConfig{
 		Server:   httpToWS(base),
 		Tenant:   resp.Tenant,
 		Service:  resp.Service,
 		AgentKey: resp.AgentKey,
-		Upstream: "http://" + ln.Addr().String(),
+		Upstream: upstream,
+	}
+	if len(opts.headers) > 0 {
+		cfg.UpstreamHeaders = map[string][]string(opts.headers)
+	}
+	if t := tokenTransportFor(opts.upstreamURL, opts.headers); t != nil {
+		cfg.Transport = t
 	}
 	cfg.Reconnect.InitialBackoff = config.Duration(time.Second)
 	cfg.Reconnect.MaxBackoff = config.Duration(30 * time.Second)
@@ -137,15 +187,35 @@ func runExpose(w io.Writer, args []string) error {
 	agentErr := make(chan error, 1)
 	go func() { agentErr <- agentClient.Run(ctx) }()
 
+	// In stdio mode, exit when the MCP server child dies too.
+	var childDone <-chan struct{}
+	if b != nil {
+		childDone = b.Done()
+	}
+
 	select {
 	case err := <-agentErr:
 		if ctx.Err() != nil {
 			return nil // interrupted by the user
 		}
 		return err
-	case <-b.Done():
+	case <-childDone:
 		return fmt.Errorf("mcp server exited: %w", b.Err())
 	}
+}
+
+// headerFlag adapts an http.Header for repeated --header "Name: value" flags.
+type headerFlag http.Header
+
+func (h headerFlag) String() string { return "" }
+
+func (h headerFlag) Set(s string) error {
+	name, value, ok := strings.Cut(s, ":")
+	if !ok || strings.TrimSpace(name) == "" {
+		return fmt.Errorf("invalid header %q, want \"Name: value\"", s)
+	}
+	http.Header(h).Add(strings.TrimSpace(name), strings.TrimSpace(value))
+	return nil
 }
 
 // deleteTunnel calls DELETE /api/v1/quick/{tenant} to destroy the tunnel.

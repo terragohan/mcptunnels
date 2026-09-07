@@ -31,8 +31,12 @@ helping a user expose an MCP server or troubleshoot a tunnel. Key points:
   `go vet ./...` and `gofmt -l .` (must be empty). CI runs exactly these.
   `make build` builds both binaries into `./dist/` (git-ignored);
   `make test` / `make lint` / `make clean` wrap the same checks.
+  `make e2e` runs `scripts/e2e.sh`, the binary-level end-to-end test
+  (real compiled binaries + YAML config + process wiring); it also runs as
+  the `e2e` job in CI.
 - Layout: `cmd/tunneld` (server), `cmd/mcptunnel` (CLI), `internal/{agent,
-  bridge,cli,config,controlplane,gateway,oauth,proxy,store,tunnelproto}`.
+  bridge,cli,config,controlplane,gateway,oauth,proxy,server,stdiofront,store,
+  tokencache,tunnelproto}`.
 - Conventions: standard library only where possible; SQLite via
   modernc.org/sqlite; config is strict (unknown yaml keys fail startup).
 - Releases: tag `v*`; the release workflow cross-compiles both binaries.
