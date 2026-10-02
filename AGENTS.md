@@ -19,7 +19,7 @@ The canonical usage guide is the skill file
 helping a user expose an MCP server or troubleshoot a tunnel. Key points:
 
 - One command: `mcptunnel expose -- <mcp server command>` (defaults to the
-  hosted relay `https://tunnel.mcptunnels.xyz`; `--server` overrides).
+  hosted relay `https://t-mcptunnels.terragohan.com`; `--server` overrides).
 - No signup/login; tunnels expire after 24h (Ctrl-C deletes the tunnel
   server-side); OAuth is on by default with a generated password the CLI
   prints — share URL + password together, and warn users: throwaway servers

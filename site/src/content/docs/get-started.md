@@ -28,14 +28,14 @@ mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
 It prints the public endpoint and password, and holds the tunnel open:
 
 ```
-https://tunnel.mcptunnels.xyz/t/q-3k9x2mab7c/s/mcp
+https://t-mcptunnels.terragohan.com/t/q-3k9x2mab7c/s/mcp
 
   password: 9f2c1ab4e7d03815a6c02b94
 ```
 
-By default `expose` tunnels through the hosted instance at `https://tunnel.mcptunnels.xyz`.
+By default `expose` tunnels through the hosted instance at `https://t-mcptunnels.terragohan.com`.
 Pass `--server` only to use a different relay (for example your own
-[self-hosted tunneld](/mcptunnels/self-hosting/)).
+[self-hosted tunneld](/self-hosting/)).
 
 ## Connect a client
 
@@ -71,5 +71,5 @@ mcptunnel expose --server http://localhost:8484 -- \
 :::caution
 `--no-auth` tunnel URLs are **unauthenticated**: anyone who has the URL can call your server's
 tools, and all traffic transits the relay operator. Expose throwaway servers only — never
-private data. See [Security](/mcptunnels/security/).
+private data. See [Security](/security/).
 :::

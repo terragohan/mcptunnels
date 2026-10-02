@@ -4,7 +4,7 @@
 
 ```sh
 mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
-# → https://tunnel.mcptunnels.xyz/t/q-3k9x2mab7c/s/mcp
+# → https://t-mcptunnels.terragohan.com/t/q-3k9x2mab7c/s/mcp
 #   password: 9f2c1ab4e7d03815a6c02b94
 ```
 
@@ -37,7 +37,7 @@ Requires Go 1.26+.
 
 ## Usage
 
-One-liners (all against the hosted relay `https://tunnel.mcptunnels.xyz` unless `--server` is given):
+One-liners (all against the hosted relay `https://t-mcptunnels.terragohan.com` unless `--server` is given):
 
 ```sh
 mcptunnel expose -- npx -y @modelcontextprotocol/server-everything   # any stdio MCP server

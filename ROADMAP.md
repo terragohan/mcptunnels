@@ -60,7 +60,7 @@ Per-tunnel OAuth 2.1 (discovery metadata, DCR, PKCE) shipped with the MVP. What 
 
 - Generic TCP/HTTP tunneling of non-MCP services (ngrok's job, done well).
 - A hosted, billing-backed SaaS. (There is a default public relay at
-  `https://tunnel.mcptunnels.xyz` for convenience — it's free and
+  `https://t-mcptunnels.terragohan.com` for convenience — it's free and
   best-effort, and self-hosting stays a first-class path.)
 - A web dashboard.
 

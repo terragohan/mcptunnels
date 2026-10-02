@@ -4,8 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://terragohan.github.io',
-	base: '/mcptunnels',
+	site: 'https://mcptunnels.terragohan.com',
 	integrations: [
 		starlight({
 			pagefind: false,

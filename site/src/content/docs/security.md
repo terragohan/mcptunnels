@@ -50,7 +50,7 @@ Only the latest commit on `main` and the most recent release receive security fi
 ## Abuse
 
 Quick tunnels are anonymous and unauthenticated, so tunneld can be abused to proxy content the
-operator did not choose. To report abuse on the hosted instance (`tunnel.mcptunnels.xyz`),
+operator did not choose. To report abuse on the hosted instance (`t-mcptunnels.terragohan.com`),
 open a GitHub issue with the tunnel URL. The operator can kill any tenant instantly with
 `tunneld -config tunneld.yaml -kill-tenant <slug>`. The hosted instance is best-effort: no
 SLA, no uptime or takedown-time guarantee.
