@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mcptunnels.terragohan.com/sitemap-index.xml

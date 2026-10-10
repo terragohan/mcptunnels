@@ -1,0 +1,38 @@
+# mcptunnels
+
+> Public URLs for local MCP servers in one command. No accounts, no signup — anonymous,
+> ephemeral (24-hour) tunnels for MCP servers, OAuth 2.1-protected by default.
+
+mcptunnels is a CLI (`mcptunnel`) plus a self-hostable relay (`tunneld`). It spawns any local
+stdio MCP server, bridges it to Streamable HTTP, and dials outbound to the relay, which
+reverse-proxies a public HTTPS URL — no inbound ports, works behind NAT. The hosted relay
+(`https://t-mcptunnels.terragohan.com`) is the default; tunnels expire after 24 hours and
+Ctrl-C deletes them immediately.
+
+## Install
+
+```sh
+go install github.com/terragohan/mcptunnels/cmd/mcptunnel@latest
+```
+
+Prebuilt Linux/macOS binaries are on the GitHub releases page.
+
+## Usage
+
+```sh
+mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
+# → https://t-mcptunnels.terragohan.com/t/q-3k9x2mab7c/s/mcp
+#   password: 9f2c1ab4e7d03815a6c02b94
+```
+
+## Docs
+
+- [Get started](https://mcptunnels.terragohan.com/get-started/): install, expose a server, connect a client
+- [How it works](https://mcptunnels.terragohan.com/how-it-works/): outbound WebSocket + yamux tunnel, stdio bridging, per-tunnel OAuth
+- [Self-hosting](https://mcptunnels.terragohan.com/self-hosting/): run your own tunneld relay
+- [Security](https://mcptunnels.terragohan.com/security/): trust model, threat model, vulnerability reporting
+- [FAQ](https://mcptunnels.terragohan.com/faq/): hosted instance, 24h TTL, NAT, comparison with ngrok/cloudflared
+
+## Links
+
+- [GitHub repository](https://github.com/terragohan/mcptunnels)
