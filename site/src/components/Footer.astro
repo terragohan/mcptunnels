@@ -3,6 +3,14 @@
 ---
 
 <div class="terragohan-footer">
+	<nav class="terragohan-footer-nav" aria-label="Footer">
+		<a href="/get-started/">Get started</a>
+		<a href="/how-it-works/">How it works</a>
+		<a href="/self-hosting/">Self-hosting</a>
+		<a href="/security/">Security</a>
+		<a href="/faq/">FAQ</a>
+		<a href="https://github.com/terragohan/mcptunnels" target="_blank" rel="noopener">GitHub</a>
+	</nav>
 	<span>More chaos, bugs, and abandoned side projects at <a href="https://terragohan.com" target="_blank" rel="noopener">terragohan.com</a>.</span>
 </div>
 
@@ -27,5 +35,11 @@
 	.terragohan-footer a:hover {
 		color: #111111;
 		text-decoration: underline;
+	}
+	.terragohan-footer-nav {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 </style>

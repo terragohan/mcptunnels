@@ -22,9 +22,35 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/terragohan/mcptunnels/edit/main/site/',
 			},
+			head: [
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:image',
+						content: 'https://mcptunnels.terragohan.com/og-image.png',
+					},
+				},
+				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:image:alt',
+						content: 'mcptunnels — public URLs for local MCP servers in one command',
+					},
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						name: 'twitter:image',
+						content: 'https://mcptunnels.terragohan.com/og-image.png',
+					},
+				},
+			],
 			components: {
 				Header: './src/components/Header.astro',
 				Footer: './src/components/Footer.astro',
+				Head: './src/components/Head.astro',
 				ThemeProvider: './src/components/ThemeProvider.astro',
 			},
 			sidebar: [

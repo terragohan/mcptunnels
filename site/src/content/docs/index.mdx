@@ -1,7 +1,30 @@
 ---
-title: mcptunnels
+title: Public URLs for local MCP servers
 description: Give a local MCP server a public URL with one command. No accounts, no signup — anonymous, ephemeral, OAuth 2.1-protected tunnels for MCP servers.
 template: splash
+head:
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "mcptunnels",
+        "url": "https://mcptunnels.terragohan.com/",
+        "description": "Give a local MCP server a public URL with one command. No accounts, no signup — anonymous, ephemeral, OAuth 2.1-protected tunnels for MCP servers.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "One-command public URLs for local stdio MCP servers",
+          "No accounts, signup, or config",
+          "OAuth 2.1 protection with a CLI-generated password by default",
+          "Anonymous, ephemeral URLs with a 24-hour TTL",
+          "Self-hostable relay (tunneld): single binary plus SQLite or Cloudflare D1",
+          "Outbound-only WebSocket + yamux connection — works behind NAT"
+        ]
+      }
 hero:
   tagline: Give a local MCP server a public URL with one command. No accounts, no signup — tunnels are anonymous, expire after 24 hours, and are OAuth 2.1-protected by default.
   actions:
