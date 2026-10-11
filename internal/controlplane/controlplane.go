@@ -31,11 +31,11 @@ const maxLiveTunnels = 500
 
 // Server is the control-plane API server.
 type Server struct {
-	store *store.Store
+	store store.API
 }
 
 // New builds the control-plane server.
-func New(st *store.Store) *Server {
+func New(st store.API) *Server {
 	return &Server{store: st}
 }
 

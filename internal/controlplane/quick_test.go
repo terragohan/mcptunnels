@@ -22,7 +22,7 @@ type api struct {
 	base string
 }
 
-func newAPI(t *testing.T, st *store.Store) *api {
+func newAPI(t *testing.T, st store.API) *api {
 	t.Helper()
 	srv := httptest.NewServer(controlplane.New(st).Handler())
 	t.Cleanup(srv.Close)

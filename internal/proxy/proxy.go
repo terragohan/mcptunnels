@@ -36,14 +36,14 @@ const maxRequestBody = 8 << 20 // 8 MiB
 // is required; "open" services skip the check.
 type Handler struct {
 	dialer   Dialer
-	store    *store.Store
+	store    store.API
 	resolver *oauth.Resolver
 }
 
 // New returns a Handler dialing services through d and resolving tenants and
 // services from st (unknown ones get a 404). resolver may be nil — all
 // services are then treated as open.
-func New(d Dialer, st *store.Store, resolver *oauth.Resolver) *Handler {
+func New(d Dialer, st store.API, resolver *oauth.Resolver) *Handler {
 	return &Handler{dialer: d, store: st, resolver: resolver}
 }
 

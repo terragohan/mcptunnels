@@ -22,6 +22,18 @@ const (
 	TLSModeDisabled TLSMode = "disabled"
 )
 
+// DatabaseDriver selects the storage backend for tunneld state.
+type DatabaseDriver string
+
+const (
+	// DatabaseDriverSQLite (default) keeps state in the local SQLite file at
+	// DatabasePath.
+	DatabaseDriverSQLite DatabaseDriver = "sqlite"
+	// DatabaseDriverD1 keeps state in a Cloudflare D1 database, accessed over
+	// its REST API.
+	DatabaseDriverD1 DatabaseDriver = "d1"
+)
+
 // DaemonConfig is the configuration for tunneld.
 type DaemonConfig struct {
 	// Listen is the address the public listener binds to.
@@ -44,8 +56,27 @@ type DaemonConfig struct {
 
 	// DatabasePath is the SQLite database file. Defaults to
 	// ./data/tunneld.db; may also be supplied via the DATABASE_PATH
-	// environment variable.
+	// environment variable. Only used when database.driver is sqlite (the
+	// default).
 	DatabasePath string `yaml:"database_path"`
+
+	// Database selects the storage backend. The default (driver sqlite)
+	// keeps state in the DatabasePath SQLite file; driver d1 stores state in
+	// a Cloudflare D1 database over its REST API.
+	Database struct {
+		// Driver is "sqlite" (default) or "d1".
+		Driver DatabaseDriver `yaml:"driver"`
+		D1     struct {
+			// AccountID and DatabaseID identify the D1 database
+			// (dashboard URLs carry both).
+			AccountID  string `yaml:"account_id"`
+			DatabaseID string `yaml:"database_id"`
+			// APITokenEnv names the environment variable holding the
+			// Cloudflare API bearer token. The token itself never lives in
+			// the yaml; startup fails when the named variable is unset.
+			APITokenEnv string `yaml:"api_token_env"`
+		} `yaml:"d1"`
+	} `yaml:"database"`
 }
 
 // Duration is a time.Duration that unmarshals from YAML strings like "5s".
@@ -112,6 +143,16 @@ func LoadDaemon(path string) (*DaemonConfig, error) {
 	}
 	if cfg.PublicBaseURL == "" {
 		return nil, fmt.Errorf("public_base_url is required")
+	}
+	switch cfg.Database.Driver {
+	case "", DatabaseDriverSQLite:
+		cfg.Database.Driver = DatabaseDriverSQLite
+	case DatabaseDriverD1:
+		if cfg.Database.D1.AccountID == "" || cfg.Database.D1.DatabaseID == "" || cfg.Database.D1.APITokenEnv == "" {
+			return nil, fmt.Errorf("database.d1.account_id, database.d1.database_id and database.d1.api_token_env are required when database.driver is %q", DatabaseDriverD1)
+		}
+	default:
+		return nil, fmt.Errorf("unknown database driver %q (want sqlite or d1)", cfg.Database.Driver)
 	}
 	switch cfg.TLS.Mode {
 	case TLSModeACME:

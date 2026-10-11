@@ -115,7 +115,9 @@ Give the printed URL to the client as a remote/streamable-HTTP MCP server:
   `/t/{tenant}/s/{service}/...` (public proxy, OAuth+password-gated by
   default), `GET /healthz`.
 - Config (`tunneld.yaml`): `listen`, `public_base_url`, `tls.mode`
-  (acme/manual/disabled), `database_path`. No other keys; unknown keys fail
+  (acme/manual/disabled), `database_path`, `database.driver`
+  (sqlite/d1, plus `database.d1.account_id` / `database_id` /
+  `api_token_env` for Cloudflare D1). No other keys; unknown keys fail
   startup.
 - A janitor deletes expired tenants every minute.
 

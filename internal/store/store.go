@@ -59,6 +59,8 @@ type Store struct {
 	db *sql.DB
 }
 
+var _ API = (*Store)(nil)
+
 const schema = `
 PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS tenants (

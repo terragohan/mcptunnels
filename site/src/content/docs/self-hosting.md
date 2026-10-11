@@ -3,9 +3,18 @@ title: Self-hosting
 description: Run your own tunneld relay — a single static binary plus a SQLite file, with automatic HTTPS via ACME.
 ---
 
-`tunneld` is a single static binary plus a SQLite file. Config (`tunneld.yaml`) is four keys:
-`listen`, `public_base_url`, `tls` (`acme` / `manual` / `disabled`), `database_path`. Unknown
-keys fail startup.
+`tunneld` is a single static binary plus a SQLite file (or a Cloudflare D1 database). Config
+(`tunneld.yaml`) is four keys: `listen`, `public_base_url`, `tls` (`acme` / `manual` / `disabled`),
+`database_path`. Unknown keys fail startup. To keep state in D1 instead of the SQLite file:
+
+```yaml
+database:
+  driver: d1
+  d1:
+    account_id: "<cloudflare account id>"
+    database_id: "<d1 database id>"
+    api_token_env: "CLOUDFLARE_API_TOKEN" # bearer token read from this env var
+```
 
 ```sh
 docker build --target tunneld -t mcptunnels/tunneld .   # or compose up -d
