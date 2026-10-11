@@ -1,14 +1,22 @@
 ---
-// Starlight's default Head renders the route's head-entry array verbatim,
-// including og:type=article on every page. The homepage is the site's front
-// door, not an article — switch only that entry to "website".
+// Starlight's default Head renders the route's head-entry array verbatim.
+// Two entries get adjusted on the way through:
+//  - og:type=article on every page — the homepage is the site's front door,
+//    not an article, so switch only that entry to "website".
+//  - <link rel="sitemap"> points at the generator's sitemap-index.xml; the
+//    postbuild step (scripts/sitemap-finalize.mjs) collapses the sitemap
+//    into a single sitemap.xml, so advertise that instead.
 const { head, id } = Astro.locals.starlightRoute;
 // The homepage route has an empty id in Starlight's route data.
-const entries = head.map((entry) =>
-	entry.attrs?.property === 'og:type' && id === ''
-		? { ...entry, attrs: { ...entry.attrs, content: 'website' } }
-		: entry
-);
+const entries = head.map((entry) => {
+	if (entry.attrs?.property === 'og:type' && id === '') {
+		return { ...entry, attrs: { ...entry.attrs, content: 'website' } };
+	}
+	if (entry.attrs?.rel === 'sitemap') {
+		return { ...entry, attrs: { ...entry.attrs, href: '/sitemap.xml' } };
+	}
+	return entry;
+});
 ---
 
 {entries.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}

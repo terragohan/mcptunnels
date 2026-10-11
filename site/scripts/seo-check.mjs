@@ -34,7 +34,7 @@ check('robots.txt exists', robots !== null);
 check('robots.txt allows crawling', robots?.includes('User-agent: *') && !robots.includes('Disallow: /'));
 check(
 	'robots.txt points at the sitemap',
-	robots?.includes(`Sitemap: ${SITE}/sitemap-index.xml`)
+	robots?.includes(`Sitemap: ${SITE}/sitemap.xml`)
 );
 
 const llms = read('llms.txt');
@@ -57,27 +57,19 @@ for (const route of ROUTES) {
 	}
 }
 
-// --- sitemap: exists, matches the indexable route set exactly, no stale hosts ---
-const sitemapIndex = read('sitemap-index.xml');
-check('sitemap-index.xml exists', sitemapIndex !== null);
-check('sitemap index references sitemap-0.xml', sitemapIndex?.includes(`${SITE}/sitemap-0.xml`));
-const sitemap = read('sitemap-0.xml');
+// --- sitemap: single merged sitemap.xml, matching the indexable route set exactly ---
+const sitemap = read('sitemap.xml');
 const locs = sitemap ? [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]) : [];
-check('sitemap has exactly the indexable routes', sitemap !== null && locs.length === ROUTES.length,
+check('sitemap.xml exists', sitemap !== null);
+check('sitemap has exactly the indexable routes', locs.length === ROUTES.length,
 	`got ${locs.length}, want ${ROUTES.length}`);
 for (const route of ROUTES) {
 	check(`sitemap contains ${route}`, locs.includes(`${SITE}${route}`));
 }
 check('sitemap has no stale github.io URLs', locs.every((l) => l.startsWith(`${SITE}/`)));
-
-// /sitemap.xml alias: same URL set, copied from sitemap-0.xml at build time.
-const alias = read('sitemap.xml');
-const aliasLocs = alias ? [...alias.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]) : [];
-check('sitemap.xml alias exists', alias !== null);
 check(
-	'sitemap.xml alias lists exactly the indexable routes',
-	aliasLocs.length === ROUTES.length && ROUTES.every((r) => aliasLocs.includes(`${SITE}${r}`)),
-	`got ${aliasLocs.length}`
+	'no sitemap index/chunk leftovers',
+	read('sitemap-index.xml') === null && read('sitemap-0.xml') === null
 );
 
 // --- per-page metadata ---
@@ -99,6 +91,7 @@ for (const route of ROUTES) {
 
 	const canonical = first(html, /<link rel="canonical" href="([^"]*)"/);
 	check(`${route} canonical is absolute on-site`, !!canonical && canonical.startsWith(`${SITE}/`), canonical ?? 'missing');
+	check(`${route} head advertises /sitemap.xml`, html.includes('<link rel="sitemap" href="/sitemap.xml"'));
 
 	const ogImage = first(html, /<meta property="og:image" content="([^"]*)"/);
 	check(`${route} og:image is absolute on-site`, !!ogImage && ogImage.startsWith(`${SITE}/`), ogImage ?? 'missing');
