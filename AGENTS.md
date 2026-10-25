@@ -35,7 +35,7 @@ helping a user expose an MCP server or troubleshoot a tunnel. Key points:
   (real compiled binaries + YAML config + process wiring); it also runs as
   the `e2e` job in CI.
 - Docs site: `site/` is an Astro + Starlight static site deployed to GitHub
-  Pages at https://mcptunnels.terragohan.com (`npm run deploy` pushes
+  Pages at https://mcptunnels.terragohan.com (`../infra/mcptunnels/deploy-site.sh` builds it and pushes
   `site/dist` to the gh-pages branch). `make site-check` builds it and runs
   the post-build SEO checks in `site/scripts/seo-check.mjs` (robots.txt,
   sitemap contents, og image, per-page metadata); the same steps run as the

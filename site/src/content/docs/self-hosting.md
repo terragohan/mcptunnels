@@ -17,7 +17,7 @@ database:
 ```
 
 ```sh
-docker build --target tunneld -t mcptunnels/tunneld .   # or compose up -d
+docker build --target tunneld -t mcptunnels/tunneld .   # or: docker compose -f ../infra/mcptunnels/docker-compose.yaml up -d
 ```
 
 For a real deployment (automatic HTTPS via ACME on :443, supervisord on Ubuntu 24.04), see

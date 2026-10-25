@@ -7,8 +7,7 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/sitemap-finalize.mjs",
     "preview": "astro preview",
-    "check": "node scripts/seo-check.mjs",
-    "deploy": "gh-pages -d dist --dotfiles"
+    "check": "node scripts/seo-check.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.7",

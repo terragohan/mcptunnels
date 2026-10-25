@@ -8,7 +8,7 @@ itself see `README.md`, `DESIGN.md`, and `AGENTS.md`.
 
 | Host | Served by | Indexable? |
 |---|---|---|
-| `https://mcptunnels.terragohan.com` | Astro + Starlight static site (`site/`), GitHub Pages (`gh-pages` branch via `npm run deploy`) | Yes — the whole point |
+| `https://mcptunnels.terragohan.com` | Astro + Starlight static site (`site/`), GitHub Pages (`gh-pages` branch via `../infra/mcptunnels/deploy-site.sh`) | Yes — the whole point |
 | `https://t-mcptunnels.terragohan.com` | `tunneld` (Go), ephemeral tenant URLs under `/t/{tenant}/` | No — disallow-all `robots.txt` served by `internal/server/server.go` |
 
 There are no per-user or secret pages on the docs host; nothing needs
