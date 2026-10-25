@@ -16,7 +16,7 @@ expires after 24 hours (or when `expose` exits).
 mcptunnel expose [--no-auth] -- <mcp server command> [args...]
 ```
 
-`--server` defaults to the hosted instance `https://tunnel.mcptunnels.xyz`;
+`--server` defaults to the hosted instance `https://t-mcptunnels.terragohan.com`;
 pass `--server https://<tunneld-host>` to use another relay.
 
 `--no-auth` disables OAuth on the public endpoint (anyone with the URL can

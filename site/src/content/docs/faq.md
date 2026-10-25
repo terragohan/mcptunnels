@@ -4,7 +4,7 @@ description: Frequently asked questions about mcptunnels.
 ---
 
 **Is there a hosted instance I can use?**
-Yes — `https://tunnel.mcptunnels.xyz` is the default `--server`, so `mcptunnel expose -- <cmd>`
+Yes — `https://t-mcptunnels.terragohan.com` is the default `--server`, so `mcptunnel expose -- <cmd>`
 works out of the box. Run your own `tunneld` (and pass `--server`) whenever you'd rather not
 trust a third-party relay.
 
@@ -14,7 +14,7 @@ same thing immediately.
 
 **Can I get a stable/permanent URL?**
 No — ephemeral URLs are the design. It keeps the service account-free and limits the blast
-radius of a leaked URL. Permanent tunnels are on the [roadmap](/mcptunnels/#roadmap).
+radius of a leaked URL. Permanent tunnels are on the [roadmap](/#roadmap).
 
 **Is my traffic encrypted?**
 Client ↔ tunneld is TLS when tunneld runs with ACME or manual certs. But the tunnel is not

@@ -6,7 +6,7 @@ hero:
   tagline: Give a local MCP server a public URL with one command. No accounts, no signup — tunnels are anonymous, expire after 24 hours, and are OAuth 2.1-protected by default.
   actions:
     - text: Get started
-      link: /mcptunnels/get-started/
+      link: /get-started/
       icon: right-arrow
     - text: View on GitHub
       link: https://github.com/terragohan/mcptunnels
@@ -14,11 +14,11 @@ hero:
       variant: minimal
 ---
 
-<img src="/mcptunnels/demo.gif" alt="Terminal demo of mcptunnel expose" class="demo-gif" />
+<img src="/demo.gif" alt="Terminal demo of mcptunnel expose" class="demo-gif" />
 
 ```sh
 mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
-# → https://tunnel.mcptunnels.xyz/t/q-3k9x2mab7c/s/mcp
+# → https://t-mcptunnels.terragohan.com/t/q-3k9x2mab7c/s/mcp
 #   password: 9f2c1ab4e7d03815a6c02b94
 ```
 
@@ -29,7 +29,7 @@ mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
 	</article>
 	<article>
 		<h3>No accounts</h3>
-		<p>No signup, no login, no config files. The hosted relay at `tunnel.mcptunnels.xyz` is the default — or self-host your own `tunneld`.</p>
+		<p>No signup, no login, no config files. The hosted relay at `t-mcptunnels.terragohan.com` is the default — or self-host your own `tunneld`.</p>
 	</article>
 	<article>
 		<h3>OAuth 2.1 by default</h3>
@@ -64,7 +64,7 @@ tunnel works fine. mcptunnels removes the stdio bridging step and everything aro
 
 :::caution[Throwaway servers only]
 All tunnel traffic transits the relay operator, and `--no-auth` URLs are unauthenticated.
-Expose throwaway servers only — never private data. See [Security](/mcptunnels/security/).
+Expose throwaway servers only — never private data. See [Security](/security/).
 :::
 
 **Status: v1.** The tunnel data plane is covered by end-to-end tests; compatibility
@@ -144,7 +144,7 @@ priorities follow real user pain.
 
 - Generic TCP/HTTP tunneling of non-MCP services (ngrok's job, done well).
 - A hosted, billing-backed SaaS. (There is a default public relay at
-  `https://tunnel.mcptunnels.xyz` for convenience — it's free and best-effort, and self-hosting
+  `https://t-mcptunnels.terragohan.com` for convenience — it's free and best-effort, and self-hosting
   stays a first-class path.)
 - A web dashboard.
 

@@ -17,7 +17,7 @@ import (
 )
 
 // DefaultServer is the hosted tunneld instance used when --server is omitted.
-const DefaultServer = "https://tunnel.mcptunnels.xyz"
+const DefaultServer = "https://t-mcptunnels.terragohan.com"
 
 // Client talks to the control-plane API under /api/v1.
 type Client struct {

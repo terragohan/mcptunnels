@@ -24,7 +24,7 @@ mcptunnel expose [--server URL | --config PATH] [--no-auth] [--header "Name: val
 mcptunnel run --url URL [--header "Name: value"]...
 mcptunnel token <add|list|remove> (run "mcptunnel token" for details)
 
-  --server URL    tunneld base URL for expose (default: https://tunnel.mcptunnels.xyz, the hosted instance)
+  --server URL    tunneld base URL for expose (default: https://t-mcptunnels.terragohan.com, the hosted instance)
   --config PATH   tunneld.yaml to read the server URL from (same-host use)`
 
 func main() {
