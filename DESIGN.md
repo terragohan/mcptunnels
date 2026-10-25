@@ -115,4 +115,6 @@ Let's Encrypt TLS-ALPN-01, `manual` cert/key, or `disabled` for local dev),
 backend), and optionally `database` (`driver: sqlite|d1`, plus
 `d1.account_id` / `d1.database_id` / `d1.api_token_env` for the Cloudflare
 D1 backend — the token itself comes from the named env var, never the yaml).
-Nothing else.
+`trust_cloudflare` may be enabled only when the daemon is reachable exclusively
+through Cloudflare; it then uses the validated `CF-Connecting-IP` header for
+per-client rate limiting. Nothing else.

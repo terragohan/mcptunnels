@@ -63,6 +63,9 @@ func main() {
 	}
 
 	handler, _ := server.NewHandler(st, cfg.PublicBaseURL)
+	if cfg.TrustCloudflare {
+		handler = server.CloudflareClientIP(handler)
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

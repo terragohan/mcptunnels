@@ -41,8 +41,9 @@ type DaemonConfig struct {
 	// PublicBaseURL is the externally visible base URL, e.g.
 	// https://tunnel.example.com. Its host is used for the ACME allowlist,
 	// and `mcptunnel expose --config` reads it to find the server.
-	PublicBaseURL string `yaml:"public_base_url"`
-	TLS           struct {
+	PublicBaseURL   string `yaml:"public_base_url"`
+	TrustCloudflare bool   `yaml:"trust_cloudflare"`
+	TLS             struct {
 		Mode TLSMode `yaml:"mode"`
 		ACME struct {
 			CacheDir string `yaml:"cache_dir"`
