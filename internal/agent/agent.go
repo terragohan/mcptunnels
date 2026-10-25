@@ -1,6 +1,6 @@
 // Package agent implements the tunnel-agent client: it dials outbound to
 // tunneld, serves yamux streams, and executes each proxied HTTP request
-// against the local upstream.
+// against the configured upstream (a local stdio bridge or a remote URL).
 package agent
 
 import (
@@ -31,6 +31,10 @@ type Client struct {
 	service  string
 	upstream *url.URL
 
+	// upstreamHeaders are injected into every upstream request after the
+	// client's credential headers have been stripped.
+	upstreamHeaders http.Header
+
 	initialBackoff time.Duration
 	maxBackoff     time.Duration
 
@@ -43,20 +47,24 @@ func New(cfg *config.AgentConfig) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid upstream URL: %w", err)
 	}
-	if upstream.Scheme == "" || upstream.Host == "" {
-		return nil, fmt.Errorf("upstream must be an absolute URL like http://localhost:3000")
+	if upstream.Scheme != "http" && upstream.Scheme != "https" {
+		return nil, fmt.Errorf("upstream must be an http(s) URL like http://localhost:3000")
 	}
 	return &Client{
-		server:         strings.TrimRight(cfg.Server, "/") + tunnelproto.ConnectPath,
-		key:            cfg.AgentKey,
-		tenant:         cfg.Tenant,
-		service:        cfg.Service,
-		upstream:       upstream,
-		initialBackoff: cfg.Reconnect.InitialBackoff.D(),
-		maxBackoff:     cfg.Reconnect.MaxBackoff.D(),
+		server:          strings.TrimRight(cfg.Server, "/") + tunnelproto.ConnectPath,
+		key:             cfg.AgentKey,
+		tenant:          cfg.Tenant,
+		service:         cfg.Service,
+		upstream:        upstream,
+		upstreamHeaders: http.Header(cfg.UpstreamHeaders),
+		initialBackoff:  cfg.Reconnect.InitialBackoff.D(),
+		maxBackoff:      cfg.Reconnect.MaxBackoff.D(),
 		httpClient: &http.Client{
-			// No overall timeout: streamed (SSE) responses may stay open
-			// indefinitely. Never follow redirects — pass them through.
+			// Transport injects the registry bearer token when configured
+			// (nil → default). No overall timeout: streamed (SSE) responses
+			// may stay open indefinitely. Never follow redirects — pass them
+			// through.
+			Transport: cfg.Transport,
 			CheckRedirect: func(*http.Request, []*http.Request) error {
 				return http.ErrUseLastResponse
 			},
@@ -129,6 +137,18 @@ func (c *Client) handleStream(stream net.Conn) {
 	req.URL.Scheme = c.upstream.Scheme
 	req.URL.Host = c.upstream.Host
 	req.RequestURI = ""
+
+	// The client talks to the public tunnel host; the upstream must not see
+	// it. Credential headers from the client (tunneld's own JWT, or whatever
+	// the internet sent on an open URL) are stripped so they never leak to a
+	// third-party upstream or collide with the injected credentials.
+	req.Host = ""
+	req.Header.Del("Authorization")
+	req.Header.Del("Proxy-Authorization")
+	req.Header.Del("Cookie")
+	for k, vals := range c.upstreamHeaders {
+		req.Header[http.CanonicalHeaderKey(k)] = vals
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

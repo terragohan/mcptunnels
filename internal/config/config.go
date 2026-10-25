@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -77,9 +78,17 @@ type AgentConfig struct {
 	Tenant   string `yaml:"tenant"`
 	AgentKey string `yaml:"agent_key"`
 	Service  string `yaml:"service"`
-	// Upstream is the local HTTP base URL requests are forwarded to, e.g.
-	// http://localhost:3000.
-	Upstream  string `yaml:"upstream"`
+	// Upstream is the HTTP base URL requests are forwarded to, e.g.
+	// http://localhost:3000 or https://api.example.com/mcp.
+	Upstream string `yaml:"upstream"`
+	// UpstreamHeaders are injected into every upstream request after the
+	// client's credential headers have been stripped. Built in memory by
+	// `mcptunnel expose --header`.
+	UpstreamHeaders map[string][]string `yaml:"upstream_headers"`
+	// Transport, when set (in memory only, never from yaml), is used for
+	// upstream requests — e.g. a tokencache.Transport injecting a managed
+	// bearer token from the registry.
+	Transport http.RoundTripper `yaml:"-"`
 	Reconnect struct {
 		InitialBackoff Duration `yaml:"initial_backoff"`
 		MaxBackoff     Duration `yaml:"max_backoff"`

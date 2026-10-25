@@ -20,12 +20,8 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/terragohan/mcptunnels/internal/config"
-	"github.com/terragohan/mcptunnels/internal/controlplane"
-	"github.com/terragohan/mcptunnels/internal/gateway"
-	"github.com/terragohan/mcptunnels/internal/oauth"
-	"github.com/terragohan/mcptunnels/internal/proxy"
+	"github.com/terragohan/mcptunnels/internal/server"
 	"github.com/terragohan/mcptunnels/internal/store"
-	"github.com/terragohan/mcptunnels/internal/tunnelproto"
 )
 
 func main() {
@@ -64,22 +60,7 @@ func main() {
 		return
 	}
 
-	// Agents authenticate with the agent key returned by POST /api/v1/quick
-	// plus X-Tenant / X-Service-Name headers.
-	gw := gateway.New(st)
-	cp := controlplane.New(st)
-	resolver := oauth.NewResolver(st, cfg.PublicBaseURL)
-
-	mux := http.NewServeMux()
-	mux.Handle(tunnelproto.ConnectPath, gw)
-	mux.Handle("/api/v1/", cp.Handler())
-	mux.Handle("/t/{tenant}/s/", proxy.New(gw, st, resolver))
-	mux.Handle("/.well-known/", resolver.WellKnownHandler())
-	mux.Handle("/t/", resolver.Handler(http.NotFoundHandler()))
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("ok\n"))
-	})
+	handler, _ := server.NewHandler(st, cfg.PublicBaseURL)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -108,7 +89,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,
-		Handler:           mux,
+		Handler:           handler,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	if cfg.TLS.Mode == config.TLSModeACME {

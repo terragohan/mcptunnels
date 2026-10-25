@@ -1,6 +1,7 @@
 // Command mcptunnel is the user-facing CLI for the mcptunnels quick-tunnel
-// service (tunneld). Its single command, expose, runs a local stdio MCP
-// server and exposes it through an anonymous, temporary public URL.
+// service (tunneld). `expose` runs a local stdio MCP server and exposes it
+// through an anonymous, temporary public URL; `run` does the reverse, bridging
+// a remote HTTP MCP endpoint to local stdio.
 package main
 
 import (
@@ -11,13 +12,19 @@ import (
 	"github.com/terragohan/mcptunnels/internal/cli"
 )
 
-const usage = `usage: mcptunnel expose [--server URL | --config PATH] -- <mcp server command> [args...]
+const usage = `usage: mcptunnel <command> [flags]
 
-Runs the given local stdio MCP server and exposes it through tunneld at a
-temporary public URL (anonymous quick tunnel, expires in 24h; the URL is the
-only secret — anyone who has it can use the server).
+  expose   run a local stdio MCP server and expose it through tunneld at a
+           temporary public URL (anonymous quick tunnel, expires in 24h)
+  run      bridge a remote streamable-HTTP MCP endpoint to local stdio, so
+           stdio-only MCP clients can use it (e.g. with --header credentials)
+  token    manage the local bearer-token registry used by expose/run --url
 
-  --server URL    tunneld base URL (default: https://tunnel.mcptunnels.xyz, the hosted instance)
+mcptunnel expose [--server URL | --config PATH] [--no-auth] [--header "Name: value"]... (-- <mcp server command> [args...] | --url URL)
+mcptunnel run --url URL [--header "Name: value"]...
+mcptunnel token <add|list|remove> (run "mcptunnel token" for details)
+
+  --server URL    tunneld base URL for expose (default: https://tunnel.mcptunnels.xyz, the hosted instance)
   --config PATH   tunneld.yaml to read the server URL from (same-host use)`
 
 func main() {
@@ -39,6 +46,10 @@ func run(w io.Writer, args []string) error {
 	switch args[0] {
 	case "expose":
 		return runExpose(w, args[1:])
+	case "run":
+		return runRun(w, args[1:])
+	case "token":
+		return runToken(w, args[1:])
 	case "-h", "--help", "help":
 		fmt.Fprintln(w, usage)
 		return nil
