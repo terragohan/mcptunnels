@@ -1,0 +1,13 @@
+services:
+  tunneld:
+    build:
+      context: .
+      target: tunneld
+    ports:
+      - "443:443"   # TLS + ACME TLS-ALPN-01
+    volumes:
+      - ./data:/data   # tunneld.yaml, SQLite DB, ACME cache
+    restart: unless-stopped
+
+# There is no separate agent service: `mcptunnel expose -- <cmd>` runs the
+# stdio bridge and the outbound tunnel agent in-process on the user's machine.

@@ -1,0 +1,42 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [linux, darwin]
+        arch: [amd64, arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: build
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: 0
+        run: |
+          set -e
+          for cmd in tunneld mcptunnel; do
+            out="dist/${cmd}_${GOOS}_${GOARCH}"
+            mkdir -p "$out"
+            go build -buildvcs=false -trimpath -ldflags="-s -w" -o "$out/$cmd" "./cmd/$cmd"
+            tar -czf "dist/${cmd}_${GOOS}_${GOARCH}.tar.gz" -C "$out" "$cmd"
+          done
+      - name: checksums
+        working-directory: dist
+        run: shasum -a 256 *.tar.gz > "checksums_${{ matrix.os }}_${{ matrix.arch }}.txt"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/checksums_*.txt
