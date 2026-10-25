@@ -1,0 +1,74 @@
+---
+title: mcptunnels
+description: Give a local MCP server a public URL with one command. No accounts, no signup — anonymous, ephemeral, OAuth 2.1-protected tunnels for MCP servers.
+template: splash
+hero:
+  tagline: Give a local MCP server a public URL with one command. No accounts, no signup — tunnels are anonymous, expire after 24 hours, and are OAuth 2.1-protected by default.
+  image:
+    html: '<img src="/mcptunnels/demo.gif" alt="Terminal demo of mcptunnel expose" style="border-radius: 0.5rem; box-shadow: var(--sl-shadow-md);" />'
+  actions:
+    - text: Get started
+      link: /mcptunnels/get-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/terragohan/mcptunnels
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+```sh
+mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
+# → https://tunnel.mcptunnels.xyz/t/q-3k9x2mab7c/s/mcp
+#   password: 9f2c1ab4e7d03815a6c02b94
+```
+
+<CardGrid stagger>
+	<Card title="One command" icon="rocket">
+		`mcptunnel expose -- <your MCP server>` spawns any stdio MCP server, bridges it to
+		Streamable HTTP, and prints a public URL. Nothing to deploy.
+	</Card>
+	<Card title="No accounts" icon="approve-check">
+		No signup, no login, no config files. The hosted relay at
+		`tunnel.mcptunnels.xyz` is the default — or self-host your own `tunneld`.
+	</Card>
+	<Card title="OAuth 2.1 by default" icon="seti:lock">
+		Public endpoints are gated behind a password the CLI generates. Clients like ChatGPT,
+		Claude, and Cursor discover the OAuth flow automatically. `--no-auth` for open URLs.
+	</Card>
+	<Card title="Ephemeral by design" icon="warning">
+		Tunnels live for 24 hours, then they're gone. Ctrl-C deletes the tunnel server-side
+		immediately — the URL and password die with your process.
+	</Card>
+</CardGrid>
+
+## Use it to
+
+- Connect **ChatGPT, Claude, Cursor**, or any remote MCP client to a server running on your laptop
+- **Demo** an MCP server to a teammate without deploying anything
+- **Test** a server against a real client during development
+
+## Why not ngrok / cloudflared?
+
+Generic tunnels forward raw TCP/HTTP. mcptunnels is MCP-shaped.
+
+| | mcptunnels | ngrok | cloudflared | bore |
+|---|---|---|---|---|
+| Takes an MCP server command | ✅ | ❌ (ports only) | ❌ | ❌ |
+| stdio → Streamable HTTP bridging | ✅ | ❌ | ❌ | ❌ |
+| No account required | ✅ | ❌ | ❌ (named tunnels) | ✅ |
+| Self-hostable relay | ✅ | ❌ | ❌ | ✅ |
+| Ephemeral-by-default URLs | ✅ (24h TTL) | ❌ | ❌ | ✅ |
+
+If you already have an MCP server listening on a port with its own HTTP transport, a generic
+tunnel works fine. mcptunnels removes the stdio bridging step and everything around it.
+
+:::caution[Throwaway servers only]
+All tunnel traffic transits the relay operator, and `--no-auth` URLs are unauthenticated.
+Expose throwaway servers only — never private data. See [Security](/mcptunnels/security/).
+:::
+
+**Status: early beta.** The tunnel data plane is covered by end-to-end tests; compatibility
+with every major hosted MCP client is not yet exhaustively verified. Bug reports welcome on
+[GitHub](https://github.com/terragohan/mcptunnels/issues).
