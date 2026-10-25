@@ -19,7 +19,7 @@ import (
 // base URL (e.g. https://tunnel.example.com). PublicBaseURL feeds the OAuth
 // discovery metadata, so for in-process tests bind the listener first and
 // pass the real reachable base.
-func NewHandler(st *store.Store, publicBaseURL string) (http.Handler, *gateway.Gateway) {
+func NewHandler(st store.API, publicBaseURL string) (http.Handler, *gateway.Gateway) {
 	// Agents authenticate with the agent key returned by POST /api/v1/quick
 	// plus X-Tenant / X-Service-Name headers.
 	gw := gateway.New(st)
@@ -33,5 +33,14 @@ func NewHandler(st *store.Store, publicBaseURL string) (http.Handler, *gateway.G
 	mux.Handle("/.well-known/", resolver.WellKnownHandler())
 	mux.Handle("/t/", resolver.Handler(http.NotFoundHandler()))
 	mux.HandleFunc("GET /healthz", proxy.Healthz)
+	mux.HandleFunc("GET /robots.txt", robotsTxt)
 	return mux, gw
+}
+
+// robotsTxt keeps crawlers out of the relay: the only public URL space here
+// is ephemeral tenant endpoints, which must never be indexed. The docs site
+// serves its own robots.txt and is unaffected.
+func robotsTxt(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte("User-agent: *\nDisallow: /\n"))
 }

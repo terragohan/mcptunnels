@@ -10,6 +10,8 @@ mcptunnel expose -- npx -y @modelcontextprotocol/server-everything
 
 Share the URL + password with your client or teammate. Works with Claude, ChatGPT, Cursor, or any remote MCP client.
 
+Docs: **[mcptunnels.terragohan.com](https://mcptunnels.terragohan.com/)** — get started, architecture, self-hosting, security model, FAQ (source in [`site/`](site/)).
+
 ![demo](assets/demo.gif)
 
 > [!WARNING]

@@ -1,0 +1,14 @@
+---
+// Starlight's default Head renders the route's head-entry array verbatim,
+// including og:type=article on every page. The homepage is the site's front
+// door, not an article — switch only that entry to "website".
+const { head, id } = Astro.locals.starlightRoute;
+// The homepage route has an empty id in Starlight's route data.
+const entries = head.map((entry) =>
+	entry.attrs?.property === 'og:type' && id === ''
+		? { ...entry, attrs: { ...entry.attrs, content: 'website' } }
+		: entry
+);
+---
+
+{entries.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}

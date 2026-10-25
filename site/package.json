@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/sitemap-alias.mjs",
     "preview": "astro preview",
+    "check": "node scripts/seo-check.mjs",
     "deploy": "gh-pages -d dist --dotfiles"
   },
   "dependencies": {
