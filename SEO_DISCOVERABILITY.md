@@ -35,12 +35,15 @@ should be indexed, add it to the checker's `ROUTES` and to
 
 - `robots.txt` (`site/public/robots.txt`): allow all + `Sitemap:` line
   pointing at `/sitemap-index.xml`.
-- `sitemap-index.xml` → `sitemap-0.xml`: generated at build time from
-  `site:` in `astro.config.mjs`; absolute URLs. `@astrojs/sitemap` always
-  writes an index + numbered URL sets and offers no rename, so
-  `scripts/sitemap-alias.mjs` (chained onto `npm run build`) additionally
-  copies the URL set to `/sitemap.xml` for tools that probe the conventional
-  path. The declared/canonical location stays `sitemap-index.xml`.
+- `sitemap.xml`: the single merged URL set — generated at build time from
+  `site:` in `astro.config.mjs` with absolute URLs. `@astrojs/sitemap`
+  always writes `sitemap-index.xml` + numbered `sitemap-N.xml` chunks and
+  offers no rename, so `scripts/sitemap-finalize.mjs` (chained onto
+  `npm run build`) merges the chunk into the conventional `/sitemap.xml`
+  and deletes the index/chunk files. This site is nowhere near the
+  protocol's 50k-URL single-file limit; the script fails the build loudly
+  if it ever gets close. robots.txt and the `<link rel="sitemap">` head tag
+  (rewritten by `Head.astro`) both point at `/sitemap.xml`.
 - `llms.txt` (`site/public/llms.txt`): summary + doc links for LLM crawlers.
 - `og-image.png` (1200×630): social card. Source SVG at
   `site/assets/og-image.svg`; regenerate with headless Chrome, e.g.
@@ -117,7 +120,7 @@ Cross-checked against code on 2026-10-10:
 2. Verify live: `curl -sf https://mcptunnels.terragohan.com/robots.txt`,
    `/sitemap-index.xml`, `/og-image.png`, `/llms.txt` — all must be 200.
 3. Google Search Console: verify property, submit
-   `https://mcptunnels.terragohan.com/sitemap-index.xml`, inspect the
+   `https://mcptunnels.terragohan.com/sitemap.xml`, inspect the
    homepage URL.
 4. Bing Webmaster Tools: import/verify and submit the same sitemap.
 5. Optional: IndexNow key for Bing; rich-result test on `/` for the
