@@ -17,14 +17,14 @@ type Server struct {
 	issuer     string // e.g. "https://host/t/q-abc123"
 	baseURL    string // e.g. "https://host"
 	tenant     string
-	store      *store.Store
+	store      store.API
 	signingKey *ecdsa.PrivateKey
 	expiresAt  time.Time // tenant expiry — access tokens live this long
 }
 
 // NewServer builds an AS for one tenant. The signing key is loaded from (or
 // generated into) the store.
-func NewServer(st *store.Store, baseURL, tenant string, expiresAt time.Time) (*Server, error) {
+func NewServer(st store.API, baseURL, tenant string, expiresAt time.Time) (*Server, error) {
 	pemStr, err := st.GetSigningKey(tenant)
 	if err != nil {
 		// Generate and store a new key.
@@ -91,7 +91,7 @@ func (s *Server) withSecurityHeaders(h http.Handler) http.Handler {
 // It also routes the well-known metadata endpoints that live outside the
 // /t/{tenant} prefix.
 type Resolver struct {
-	store   *store.Store
+	store   store.API
 	baseURL string
 
 	mu      sync.Mutex
@@ -103,7 +103,7 @@ func (r *Resolver) BaseURL() string { return r.baseURL }
 
 // NewResolver returns a Resolver that builds per-tenant AS instances backed by
 // st, with issuer URLs derived from baseURL.
-func NewResolver(st *store.Store, baseURL string) *Resolver {
+func NewResolver(st store.API, baseURL string) *Resolver {
 	return &Resolver{
 		store:   st,
 		baseURL: strings.TrimRight(baseURL, "/"),

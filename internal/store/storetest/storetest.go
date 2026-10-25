@@ -9,9 +9,9 @@ import (
 	"github.com/terragohan/mcptunnels/internal/store"
 )
 
-// Open opens a migrated store on a fresh SQLite database in t.TempDir() and
+// Open opens a migrated SQLite store on a fresh database in t.TempDir() and
 // registers a cleanup that closes it.
-func Open(t testing.TB) *store.Store {
+func Open(t testing.TB) store.API {
 	t.Helper()
 	st, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
 	if err != nil {

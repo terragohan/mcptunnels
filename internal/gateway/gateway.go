@@ -26,7 +26,7 @@ var ErrServiceOffline = errors.New("gateway: service offline")
 // Gateway accepts agent connections and dispenses streams to them. It is safe
 // for concurrent use.
 type Gateway struct {
-	st *store.Store
+	st store.API
 
 	mu       sync.Mutex
 	sessions map[string]*yamux.Session // tenant + "\x00" + service -> active session
@@ -35,7 +35,7 @@ type Gateway struct {
 // New returns a Gateway that authorizes agents against the store:
 // Authorization: Bearer <agent_key> is checked with
 // store.ValidateAgentKey(X-Tenant, X-Service-Name, key).
-func New(st *store.Store) *Gateway {
+func New(st store.API) *Gateway {
 	return &Gateway{
 		st:       st,
 		sessions: make(map[string]*yamux.Session),

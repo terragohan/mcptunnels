@@ -9,6 +9,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -22,6 +23,7 @@ import (
 	"github.com/terragohan/mcptunnels/internal/config"
 	"github.com/terragohan/mcptunnels/internal/server"
 	"github.com/terragohan/mcptunnels/internal/store"
+	"github.com/terragohan/mcptunnels/internal/stored1"
 )
 
 func main() {
@@ -35,12 +37,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	st, err := store.Open(cfg.DatabasePath)
+	st, closer, err := openStore(cfg)
 	if err != nil {
 		slog.Error("open store", "err", err)
 		os.Exit(1)
 	}
-	defer st.Close()
+	defer closer.Close()
 
 	// Operator kill switch: delete an abusive tenant directly in the
 	// database and exit. Its public endpoints 404 and its agent key stops
@@ -137,6 +139,35 @@ func main() {
 			slog.Warn("graceful shutdown failed, forcing close", "err", err)
 			srv.Close()
 		}
+	}
+}
+
+// openStore builds the storage backend selected by the config: the local
+// SQLite file (default) or a Cloudflare D1 database. The D1 bearer token is
+// read from the environment variable named by database.d1.api_token_env —
+// never from the yaml.
+func openStore(cfg *config.DaemonConfig) (store.API, io.Closer, error) {
+	switch cfg.Database.Driver {
+	case config.DatabaseDriverD1:
+		token := os.Getenv(cfg.Database.D1.APITokenEnv)
+		if token == "" {
+			return nil, nil, fmt.Errorf("environment variable %s (database.d1.api_token_env) is unset or empty", cfg.Database.D1.APITokenEnv)
+		}
+		st, err := stored1.New(stored1.Config{
+			AccountID:  cfg.Database.D1.AccountID,
+			DatabaseID: cfg.Database.D1.DatabaseID,
+			APIToken:   token,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+		return st, st, nil
+	default:
+		st, err := store.Open(cfg.DatabasePath)
+		if err != nil {
+			return nil, nil, err
+		}
+		return st, st, nil
 	}
 }
 

@@ -26,5 +26,14 @@ tls:
 # SQLite database file holding tunneld's state (ephemeral tenants, services,
 # agent keys). May also be supplied via the DATABASE_PATH environment
 # variable. In docker-compose the ./data volume is mounted at /data, so the
-# default works there too.
+# default works there too. Only used with the default database driver.
 database_path: "./data/tunneld.db"
+
+# Optional storage backend selection. The default is local SQLite (above).
+# To keep state in Cloudflare D1 instead:
+#   database:
+#     driver: d1
+#     d1:
+#       account_id: "<cloudflare account id>"
+#       database_id: "<d1 database id>"
+#       api_token_env: "CLOUDFLARE_API_TOKEN"  # bearer token from this env var
