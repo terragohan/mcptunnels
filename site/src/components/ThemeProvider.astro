@@ -1,0 +1,17 @@
+---
+// Force light theme to match the minimalist engineer-friendly design.
+---
+
+<script is:inline>
+	window.StarlightThemeProvider = (() => {
+		document.documentElement.dataset.theme = 'light';
+		try {
+			localStorage.setItem('starlight-theme', 'light');
+		} catch {}
+		return {
+			updatePickers() {
+				// Theme picker is hidden; no-op.
+			},
+		};
+	})();
+</script>

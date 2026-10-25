@@ -2,28 +2,27 @@
 import DefaultHeader from '@astrojs/starlight/components/Header.astro';
 ---
 
-<div class="terragohan-banner">
-	<span>
-		More chaos, bugs, and abandoned side projects at{' '}
-		<a href="https://terragohan.com" target="_blank" rel="noopener">terragohan.com</a>.
-	</span>
+<div class="terragohan-header-strip">
+	<a href="https://terragohan.com" target="_blank" rel="noopener">terragohan.com</a>
 </div>
 <DefaultHeader />
 
 <style>
-	.terragohan-banner {
-		background: var(--sl-color-gray-6);
-		color: var(--sl-color-gray-2);
-		padding: 0.4rem 1rem;
+	.terragohan-header-strip {
+		background: #ffffff;
+		border-bottom: 1px solid #e5e5e5;
 		text-align: center;
-		font-size: var(--sl-text-sm);
+		padding: 0.25rem 1rem;
+		font-size: 0.75rem;
+		color: #737373;
 	}
-	.terragohan-banner a {
-		color: var(--sl-color-white);
-		font-weight: 600;
+	.terragohan-header-strip a {
+		color: #737373;
 		text-decoration: none;
+		font-family: var(--sl-font);
 	}
-	.terragohan-banner a:hover {
+	.terragohan-header-strip a:hover {
+		color: #111111;
 		text-decoration: underline;
 	}
 </style>

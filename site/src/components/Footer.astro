@@ -1,29 +1,31 @@
 ---
-import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
+// Minimal footer — no edit link, no pagination.
 ---
 
-<DefaultFooter />
-
-<div class="terragohan-credit">
-	<a href="https://terragohan.com" target="_blank" rel="noopener">
-		Developed with love by terragohan — and by "love" we mean caffeine, spite, and one (1)
-		nervous breakdown.
-	</a>
+<div class="terragohan-footer">
+	<span>More chaos, bugs, and abandoned side projects at <a href="https://terragohan.com" target="_blank" rel="noopener">terragohan.com</a>.</span>
 </div>
 
 <style>
-	.terragohan-credit {
+	.terragohan-footer {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 1rem 0;
+		margin-top: 3rem;
+		border-top: 1px solid #e5e5e5;
+		font-size: 0.875rem;
+		color: #737373;
+		gap: 1rem;
+		flex-wrap: wrap;
 		text-align: center;
-		padding: 1rem;
-		font-size: var(--sl-text-sm);
-		color: var(--sl-color-gray-3);
 	}
-	.terragohan-credit a {
-		color: inherit;
+	.terragohan-footer a {
+		color: #737373;
 		text-decoration: none;
 	}
-	.terragohan-credit a:hover {
-		color: var(--sl-color-white);
+	.terragohan-footer a:hover {
+		color: #111111;
 		text-decoration: underline;
 	}
 </style>

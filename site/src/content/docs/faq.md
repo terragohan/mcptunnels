@@ -14,7 +14,7 @@ same thing immediately.
 
 **Can I get a stable/permanent URL?**
 No — ephemeral URLs are the design. It keeps the service account-free and limits the blast
-radius of a leaked URL. Permanent tunnels are on the [roadmap](/mcptunnels/roadmap/).
+radius of a leaked URL. Permanent tunnels are on the [roadmap](/mcptunnels/#roadmap).
 
 **Is my traffic encrypted?**
 Client ↔ tunneld is TLS when tunneld runs with ACME or manual certs. But the tunnel is not
